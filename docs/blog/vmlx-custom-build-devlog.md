@@ -57,9 +57,50 @@ const handleStartDownload = async (repoId: string) => {
 
 ---
 
-## 2. 3.8GB를 받았는데 어디 갔지? mflux 이미지 모델 실종 사건
+## 2. "이거 내 맥에서 돌아갈까?" 모델 적합도 사전 진단 엔진 탑재
 
-다운로드 기능을 손보고 나서, 가볍고 빠르다는 FLUX.2 Klein 4B 모델(`Audante/FLUX.2-klein-4B-mflux-q4`)을 다운로드 탭에서 받았다. 3.8GB를 다 받고 상태도 초록색 **"Downloaded"**로 바뀌었다.
+로컬에서 오픈소스 모델을 만지다 보면 누구나 한 번쯤 겪는 악몽이 있다. 
+
+기껏 수십 기가바이트짜리 모델을 한참 걸려 받아놨는데, 로드 버튼을 누르는 순간 메모리가 터지며 맥이 뻗어버리거나(OOM) 앱이 튕기는 일이다.
+
+Apple Silicon 맥은 통합 메모리라 여유가 있는 편이지만, macOS 기본 정책상 GPU가 쓸 수 있는 램 한도는 전체 램의 약 75% 수준이다. 게다가 모델 파일 크기가 30GB라고 해서 램도 딱 30GB만 먹는 게 아니다. 추론할 때 생기는 KV 캐시와 컨텍스트 메모리까지 고려하면 훨씬 더 많은 여유 공간이 필요하다.
+
+"다운로드 버튼을 누르기 전에, 내 맥에서 쾌적하게 돌아갈지 미리 알 수는 없을까?"
+
+이 물음에서 출발해 **하드웨어 맞춤형 모델 적합도(Memory Fit) 진단 시스템**을 붙였다.
+
+### 어떻게 진단하나?
+메인 프로세스에서 현재 Mac의 칩셋(`chipFamily`, `chipTier`)과 전체 통합 메모리 용량(`totalRamGb`)을 실시간으로 읽어온다. 그리고 모델별 가중치 크기와 컨텍스트 버퍼, 혹은 사전 검증된 실 서빙 풋프린트(`KNOWN_MODEL_MEMORY_REQUIREMENTS`)를 대조해 4단계 뱃지와 친절한 안내를 띄우도록 설계했다.
+
+- **✓ 추천 (쾌적)**: 기본 GPU 메모리 한도(~75%) 안에서 아주 부드럽게 돌아감
+- **⚠ 주의 (겨우 들어감)**: 가용 메모리 경계에 아슬아슬하게 걸침. 컨텍스트 길이를 줄이거나 시스템 GPU 한도를 늘려야 함
+- **✕ 실행 불가**: 현재 맥의 전체 메모리를 넘어서는 크기. 다운로드받아도 어차피 뻗으니 시간 낭비하지 말라고 빨간 뱃지로 차단
+- **메모리 미확인**: 메타데이터가 부족한 경우
+
+```typescript
+// 내 Mac 스펙과 모델 요구량을 대조해 안전성을 판정하는 로직
+export function evaluateModelFit(model: ScannedModel, specs: MacHardwareSpecs): ModelFitEvaluation {
+  const needsGb = estimateModelNeedsGb(model)
+  
+  if (needsGb <= specs.gpuDefaultLimitGb) {
+    return { status: 'runs_well', badgeColor: 'emerald', badgeLabel: `✓ 추천 (${needsGb} GB · 쾌적)` }
+  } else if (needsGb <= specs.gpuMaxLimitGb) {
+    return { status: 'tight', badgeColor: 'amber', badgeLabel: `⚠ 주의 (${needsGb} GB · 겨우 들어감)` }
+  } else {
+    return { status: 'too_big', badgeColor: 'rose', badgeLabel: `✕ 실행 불가 (${needsGb} GB 필요)` }
+  }
+}
+```
+
+여기에 더해, 다운로드 화면 상단에 내 맥 스펙(`Apple M4 Max · 128 GB Unified Memory`)을 바로 보여주는 배너를 올렸다. 
+
+그리고 모델 피드 정렬 기준에 **'내 램에 가장 가득 찬 순(가용 범위 내 대형 모델 우선)'**과 **'쾌적 순'** 필터를 추가했다. 이제 내 맥이 가진 잠재력을 끝까지 쥐어짜고 싶을 때, 돌아가지도 않는 모델을 받느라 헛걸음할 일이 사라졌다.
+
+---
+
+## 3. 3.8GB를 받았는데 어디 갔지? mflux 이미지 모델 실종 사건
+
+다운로드 기능과 적합도 체크를 손보고 나서, 가볍고 빠르다는 FLUX.2 Klein 4B 모델(`Audante/FLUX.2-klein-4B-mflux-q4`)을 다운로드 탭에서 받았다. 3.8GB를 다 받고 상태도 초록색 **"Downloaded"**로 바뀌었다.
 
 기쁜 마음으로 이미지 생성 탭(`Image`)의 "Choose an image model" 화면을 열었다.
 
@@ -95,7 +136,7 @@ const BUILTIN_IMAGE_PATHS = [
 
 ---
 
-## 3. 사소하지만 참기 힘들었던 UI 줄바꿈 참사들
+## 4. 사소하지만 참기 힘들었던 UI 줄바꿈 참사들
 
 기능 버그를 잡고 나니 이번엔 레이아웃 디테일들이 거슬렸다.
 
@@ -107,7 +148,7 @@ const BUILTIN_IMAGE_PATHS = [
 
 ---
 
-## 4. 한국어 우선 배치와 11개 언어팩 정비
+## 5. 한국어 우선 배치와 11개 언어팩 정비
 
 다국어 지원도 손봤다. 글로벌 오픈소스 앱이라 여러 언어를 지원하긴 하는데, 언어 선택 메뉴에서 한국어가 끄트머리에 처박혀 있었다. 내가 쓸 거니까 한국어(`ko`)를 당당하게 배열 맨 위로 끌어올렸다.
 
@@ -117,7 +158,7 @@ vMLX는 테스트 슈트에서 i18n 무결성을 매우 깐깐하게 검증한�
 
 ---
 
-## 5. 빌드부터 설치까지 한 번에 끝내기
+## 6. 빌드부터 설치까지 한 번에 끝내기
 
 모든 수정을 마치고 실제 Mac 애플리케이션으로 패키징했다.
 

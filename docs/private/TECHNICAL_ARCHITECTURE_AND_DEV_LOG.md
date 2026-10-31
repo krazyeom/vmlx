@@ -16,11 +16,12 @@
    - 2.1 agy CLI Auto 모드 기본값 설정
    - 2.2 앱 저작권(Copyright) 및 크레딧 표기
    - 2.3 모델 원클릭 다운로드 및 실시간 프로그레스 바 UI/IPC
-   - 2.4 디렉토리 관리 버튼 UI 인라인 정렬
-   - 2.5 6개 신규 언어팩 추가(총 11개 언어) 및 번역 무결성 검증
-   - 2.6 언어 선택 목록 한국어(ko) 최상단 배치
-   - 2.7 세션 대시보드 줄바꿈 폭 확장 및 채팅 기록 안내/버튼 분리
-   - 2.8 mflux 이미지 모델 스캔 및 ImageModelPicker 다운로드 모델 목록 구현
+   - 2.4 Mac 하드웨어 스펙 감지 및 모델 메모리 적합도(Memory Fit) 사전 평가 엔진
+   - 2.5 디렉토리 관리 버튼 UI 인라인 정렬
+   - 2.6 6개 신규 언어팩 추가(총 11개 언어) 및 번역 무결성 검증
+   - 2.7 언어 선택 목록 한국어(ko) 최상단 배치
+   - 2.8 세션 대시보드 줄바꿈 폭 확장 및 채팅 기록 안내/버튼 분리
+   - 2.9 mflux 이미지 모델 스캔 및 ImageModelPicker 다운로드 모델 목록 구현
 3. [빌드, 서명 및 배포 파이프라인 (Build & Deployment)](#3-빌드-서명-및-배포-파이프라인)
 4. [개인 Git 관리 및 Upstream PR 격리 전략 (Git & PR Strategy)](#4-개인-git-관리-및-upstream-pr-격리-전략)
 
@@ -123,7 +124,28 @@ flowchart TB
 
 ---
 
-### 2.4 디렉토리 관리 버튼 UI 인라인 정렬
+### 2.4 Mac 하드웨어 스펙 감지 및 모델 메모리 적합도(Memory Fit) 사전 평가 엔진
+- **문제점 및 개발 배경**:
+  - 로컬 대형 모델은 수십 GB에 달하며, 다운로드 완료 후 로드 시도시 OOM(Out of Memory)으로 인해 앱이 크래시되거나 시스템이 멈추는 리스크가 큼.
+  - 사용자가 다운로드 버튼을 누르기 전에 **"내 Mac의 통합 메모리와 GPU 가용 한도 내에서 이 모델이 안전하게 구동되는지"** 미리 직관적으로 판별할 수 있는 장치가 필요함.
+- **아키텍처 및 구현 상세**:
+  1. **하드웨어 사양 실시간 감지 ([macSpecs.ts](file:///Users/krazyeom/dev/vmlx/panel/src/main/macSpecs.ts))**:
+     - `system_profiler SPHardwareDataType` 및 OS 호출을 통해 Apple Silicon 칩셋 정보(`chipFamily`, `chipTier`)와 전체 UMA RAM 크기(`totalRamGb`)를 쿼리.
+     - macOS 기본 GPU 메모리 한도(`gpuDefaultLimitGb` ~75%) 및 유선 메모리 실가용치(`gpuMaxLimitGb` ~90%) 산출.
+  2. **메모리 적합도 평가 엔진 ([modelMemoryFit.ts](file:///Users/krazyeom/dev/vmlx/panel/src/shared/modelMemoryFit.ts))**:
+     - 모델 가중치 크기, KV 캐시 컨텍스트 헤드룸, 큐레이션된 서빙 풋프린트(`KNOWN_MODEL_MEMORY_REQUIREMENTS`)를 기반으로 4단계 진단 상태 산출:
+       - `runs_well` (초록색 뱃지): 기본 GPU 한도 내에서 쾌적하게 구동 (`✓ 추천 (N GB · 쾌적)`)
+       - `tight` (노란색 뱃지): 메모리 경계에 근접, GPU 한도 상향 및 컨텍스트 길이 조절 필요 (`⚠ 주의 (N GB · 겨우 들어감)`)
+       - `too_big` (빨간색 뱃지): 통합 메모리 초과, OOM 크래시 방지를 위해 다운로드 비추천 경고 (`✕ 실행 불가 (N GB 필요)`)
+       - `unknown` (회색 뱃지): 메타데이터 부족
+  3. **UI 통합 및 맞춤 정렬 ([DownloadTab.tsx](file:///Users/krazyeom/dev/vmlx/panel/src/renderer/src/components/sessions/DownloadTab.tsx))**:
+     - 다운로드 탭 상단에 현재 시스템 하드웨어 사양 배너 렌더링.
+     - 모델 피드 헤더에 `호환성 순(compatibility)`, `쾌적 순(comfortable)`, `내 램에 가득 찬 순(fullest_ram)` 정렬 필터를 배치하여 사용자가 자신의 Mac 하드웨어에 최적화된 모델을 즉시 탐색할 수 있도록 구현.
+     - 진단 메시지 및 뱃지 문구 전체를 11개 다국어 i18n 시스템과 완전 연동.
+
+---
+
+### 2.5 디렉토리 관리 버튼 UI 인라인 정렬
 - **문제점**:
   - `디렉토리`, `프로세스 감지`, `+ 새 세션` 버튼 영역에서 디렉토리 아이콘과 텍스트가 고정폭/줄바꿈 규칙으로 인해 한 줄 밀려 보이는 시각적 결함 발생.
 - **해결 구현**:
@@ -131,7 +153,7 @@ flowchart TB
 
 ---
 
-### 2.5 6개 신규 언어팩 추가(총 11개 언어) 및 번역 무결성 검증
+### 2.6 6개 신규 언어팩 추가(총 11개 언어) 및 번역 무결성 검증
 - **문제점**:
   - 기존 5개 언어(`en`, `ko`, `zh`, `ja`, `es`) 외에 글로벌 사용자를 위한 언어팩 확충 필요.
 - **해결 구현**:
@@ -149,14 +171,14 @@ flowchart TB
 
 ---
 
-### 2.6 언어 선택 목록 한국어(ko) 최상단 배치
+### 2.7 언어 선택 목록 한국어(ko) 최상단 배치
 - **구현**:
   - [catalog.ts](file:///Users/krazyeom/dev/vmlx/panel/src/renderer/src/i18n/catalog.ts) 및 [i18n.ts](file:///Users/krazyeom/dev/vmlx/panel/src/main/i18n.ts)의 `LOCALES` 배열에서 한국어(`ko`)를 첫 번째 인덱스로 변경.
   - UI 언어 선택 드롭다운 및 메뉴에서 한국어가 최상단에 노출됨.
 
 ---
 
-### 2.7 세션 대시보드 줄바꿈 폭 확장 및 채팅 기록 안내/버튼 분리
+### 2.8 세션 대시보드 줄바꿈 폭 확장 및 채팅 기록 안내/버튼 분리
 - **문제점**:
   1. 세션 안내 문구 및 퀵스타트 팁("세션을 만들어 모델을 로드하고...", "JANG 2비트 모델은...")이 폭 제한(`max-w-xl`)으로 인해 불필요하게 2줄로 꺾임.
   2. 채팅 기록 상단에서 안내 문구("채팅 1개 • Shift를 누른 채 ×를 클릭하면 확인 생략")와 "모두 지우기" 버튼이 가로로 배치되면서 폭이 좁아질 때 글자가 밀리는 현상 발생.
@@ -166,7 +188,7 @@ flowchart TB
 
 ---
 
-### 2.8 mflux 이미지 모델 스캔 및 ImageModelPicker 다운로드 모델 목록 구현
+### 2.9 mflux 이미지 모델 스캔 및 ImageModelPicker 다운로드 모델 목록 구현
 - **문제점**:
   - 사용자가 Hugging Face에서 이미지 모델(`Audante/FLUX.2-klein-4B-mflux-q4`)을 정상 다운로드("Downloaded" 표시)했음에도, Image 탭의 "Choose an image model" 화면에 나타나지 않아 모델을 로드할 수 없었음.
 - **근본 원인 분석**:
