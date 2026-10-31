@@ -228,31 +228,32 @@ export function SessionDashboard({ onOpenSession, onConfigureSession, onCreateSe
   return (
     <div className="p-6 overflow-auto h-full">
       {/* Header */}
-      <div className="flex items-center justify-between mb-6">
+      <div className="flex items-center justify-between mb-6 gap-4 flex-wrap">
         <div>
           <h1 className="text-2xl font-bold">{title || t('sessions.dashboard.defaultTitle')}</h1>
           {subtitle && <p className="text-sm text-muted-foreground mt-0.5">{subtitle}</p>}
         </div>
-        <div className="flex gap-2">
+        <div className="flex items-center gap-2 flex-shrink-0 flex-wrap">
           <button
             onClick={() => { setShowDirManager(!showDirManager); if (!showDirManager) loadDirectories() }}
-            className={`px-3 py-1.5 text-sm border rounded ${
-              showDirManager ? 'border-primary bg-primary/10 text-primary' : 'border-border hover:bg-accent'
+            className={`inline-flex items-center gap-1.5 px-3 py-1.5 text-sm border rounded whitespace-nowrap transition-colors ${
+              showDirManager ? 'border-primary bg-primary/10 text-primary font-medium' : 'border-border hover:bg-accent'
             }`}
             title={t('sessions.dashboard.directoriesTitle')}
           >
-            <FolderOpen className="h-4 w-4" /> {t('sessions.dashboard.directories')}
+            <FolderOpen className="h-4 w-4 flex-shrink-0" />
+            <span>{t('sessions.dashboard.directories')}</span>
           </button>
           <button
             onClick={handleDetect}
-            className="px-3 py-1.5 text-sm border border-border rounded hover:bg-accent"
+            className="inline-flex items-center justify-center px-3 py-1.5 text-sm border border-border rounded hover:bg-accent whitespace-nowrap transition-colors"
           >
             {t('sessions.dashboard.detectProcesses')}
           </button>
           <button
             onClick={onCreateSession}
             data-vmlx-control="session-create"
-            className="px-4 py-1.5 text-sm bg-primary text-primary-foreground rounded hover:bg-primary/90"
+            className="inline-flex items-center justify-center px-4 py-1.5 text-sm bg-primary text-primary-foreground rounded hover:bg-primary/90 whitespace-nowrap font-medium transition-colors"
           >
             {t('sessions.dashboard.newSession')}
           </button>
