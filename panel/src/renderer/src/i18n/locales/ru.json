@@ -61,7 +61,8 @@
       "dark": "Темная тема",
       "light": "Светлая тема",
       "system": "Системная тема"
-    }
+    },
+    "error": "Ошибка"
   },
   "status": {
     "running": "Бег",
@@ -1916,7 +1917,11 @@
       "descKontext": "Тематически согласованное редактирование (24 шага)",
       "descFill": "Рисование с маской (20 шагов)",
       "keepCurrent": "Оставьте {model}",
-      "classFlux2KleinEdit": "Flux2KleinEdit (редактирование Кляйна)"
+      "classFlux2KleinEdit": "Flux2KleinEdit (редактирование Кляйна)",
+      "downloadedModelsTitle": "Загруженные модели",
+      "scanningModels": "Сканирование локальных моделей…",
+      "noDownloadedModels": "Загруженные модели изображений не найдены.",
+      "selected": "Выбрано"
     },
     "prompt": {
       "upscale": "высококлассный",

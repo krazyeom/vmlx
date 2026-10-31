@@ -92,8 +92,8 @@ describe("image model autodetection path", () => {
   });
 
   it("image edit requests normalize painted mask data URLs before proxying", () => {
-    const src = readFileSync(IMAGE_TS, "utf-8");
-    expect(src).toContain("body.mask = maskBase64.replace");
+    const src = readFileSync(join(__dirname, "../src/shared/imageNativeInputs.ts"), "utf-8");
+    expect(src).toContain("body.mask = params.maskBase64.replace");
     expect(src).toContain("data:image");
   });
 

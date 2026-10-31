@@ -61,7 +61,8 @@
       "dark": "Dunkles Thema",
       "light": "Lichtthema",
       "system": "Systemthema"
-    }
+    },
+    "error": "Fehler"
   },
   "status": {
     "running": "Läuft",
@@ -1916,7 +1917,11 @@
       "descKontext": "Themenkonsistente Bearbeitung (24 Schritte)",
       "descFill": "Inpainting mit Maske (20 Schritte)",
       "keepCurrent": "{model} behalten",
-      "classFlux2KleinEdit": "Flux2KleinEdit (Klein-Bearbeitung)"
+      "classFlux2KleinEdit": "Flux2KleinEdit (Klein-Bearbeitung)",
+      "downloadedModelsTitle": "Heruntergeladene Modelle",
+      "scanningModels": "Lokale Modelle werden gescannt…",
+      "noDownloadedModels": "Keine heruntergeladenen Bildmodelle gefunden.",
+      "selected": "Ausgewählt"
     },
     "prompt": {
       "upscale": "Gehoben",

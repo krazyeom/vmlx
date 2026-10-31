@@ -342,9 +342,9 @@ export function resolveImageModelFromDirectoryName(name: string): ImageModelDef 
   const normalize = (s: string): string => {
     let out = s.trim().toLowerCase()
     if (out.includes('/')) out = out.split('/').pop() || out
-    out = out.replace(/-mflux-(?:\d+bit|q[3-8]|bf16)$/, '')
+    out = out.replace(/-mflux-(?:\d+bit|q\d+(?:_[a-z0-9]+)?|bf16)$/i, '')
     out = out.replace(/-mflux$/, '')
-    out = out.replace(/[-_]\d+bit$/, '')
+    out = out.replace(/[-_](?:\d+bit|q\d+(?:_[a-z0-9]+)?)$/i, '')
     for (const p of ['int-', 'ext-', 'int_', 'ext_']) {
       if (out.startsWith(p)) { out = out.slice(p.length); break }
     }

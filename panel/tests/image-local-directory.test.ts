@@ -43,6 +43,13 @@ function mfluxBundle(root: string, name: string, stored: number | null, mfluxVer
 const tmp = () => mkdtempSync(join(tmpdir(), 'vmlx-img-'))
 
 describe('local image model directories (external drive bundles)', () => {
+  it('inspects Audante/FLUX.2-klein-4B-mflux-q4 bundle structure correctly', () => {
+    const dir = mfluxBundle(tmp(), 'Audante/FLUX.2-klein-4B-mflux-q4', 4)
+    const result = inspectLocalImageModel(dir)
+    expect(result.success).toBe(true)
+    expect(result.model?.id).toBe('klein-4b')
+    expect(result.quantize).toBe(4)
+  })
   it.each(['config.json', 'transformer/config.json', 'text_encoder/config.json'])('rejects declared bitsandbytes at %s despite mflux-looking names or stamps', configPath => {
     const dir = mfluxBundle(tmp(), 'Z-Image-Turbo-mflux-4bit', 4)
     writeFileSync(join(dir, configPath), JSON.stringify({

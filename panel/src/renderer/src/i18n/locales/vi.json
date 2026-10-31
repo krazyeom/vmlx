@@ -61,7 +61,8 @@
       "dark": "Chủ đề tối",
       "light": "Chủ đề nhẹ nhàng",
       "system": "Chủ đề hệ thống"
-    }
+    },
+    "error": "Lỗi"
   },
   "status": {
     "running": "Đang chạy",
@@ -1916,7 +1917,11 @@
       "descKontext": "Chỉnh sửa nhất quán theo chủ đề (24 bước)",
       "descFill": "Vẽ bằng mặt nạ (20 bước)",
       "keepCurrent": "Giữ {model}",
-      "classFlux2KleinEdit": "Flux2KleinEdit (Chỉnh sửa Klein)"
+      "classFlux2KleinEdit": "Flux2KleinEdit (Chỉnh sửa Klein)",
+      "downloadedModelsTitle": "Mô hình đã tải xuống",
+      "scanningModels": "Đang quét các mô hình cục bộ…",
+      "noDownloadedModels": "Không tìm thấy mô hình hình ảnh nào đã tải xuống.",
+      "selected": "Đã chọn"
     },
     "prompt": {
       "upscale": "cao cấp",

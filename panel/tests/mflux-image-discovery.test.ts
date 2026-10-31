@@ -33,6 +33,11 @@ describe('mflux-only image discovery', () => {
   it('accepts renamed models from supported base metadata, not an author allow-list', () => {
     expect(isMfluxImageCandidate({ ...bundle('thirdparty/artwork'), cardData: { base_model: 'Qwen/Qwen-Image' } })).toBe(true)
     expect(isMfluxImageCandidate({ ...bundle('thirdparty/artwork'), tags: ['mflux', 'base_model:finetune:Qwen/Qwen-Image'] })).toBe(true)
+    expect(isMfluxImageCandidate({
+      id: 'Audante/FLUX.2-klein-4B-mflux-q4',
+      tags: ['mflux', 'safetensors', 'base_model:black-forest-labs/FLUX.2-klein-4B'],
+      siblings: [{ rfilename: 'transformer/0.safetensors' }, { rfilename: 'text_encoder/0.safetensors' }],
+    })).toBe(true)
   })
   it.each(['GGUF', 'EXL3', 'NVFP4', 'LoRA', 'ControlNet'])('excludes %s even if named or tagged mflux', format => {
     expect(isMfluxImageCandidate({ ...bundle(), tags: ['mflux', format.toLowerCase()] })).toBe(false)

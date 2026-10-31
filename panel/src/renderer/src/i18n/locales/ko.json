@@ -61,7 +61,8 @@
       "dark": "어두운 테마",
       "light": "밝은 테마",
       "system": "시스템 테마"
-    }
+    },
+    "error": "오류"
   },
   "status": {
     "running": "실행 중",
@@ -1916,7 +1917,11 @@
       "descKontext": "피사체 일관성 편집 (24스텝)",
       "descFill": "마스크 인페인팅 (20스텝)",
       "keepCurrent": "{model} 유지",
-      "classFlux2KleinEdit": "Flux2KleinEdit (Klein 편집)"
+      "classFlux2KleinEdit": "Flux2KleinEdit (Klein 편집)",
+      "downloadedModelsTitle": "다운로드된 모델",
+      "scanningModels": "로컬 모델 스캔 중…",
+      "noDownloadedModels": "다운로드된 이미지 모델이 없습니다.",
+      "selected": "선택됨"
     },
     "prompt": {
       "upscale": "확대",

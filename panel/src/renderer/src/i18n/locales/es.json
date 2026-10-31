@@ -61,7 +61,8 @@
       "dark": "Tema oscuro",
       "light": "Tema claro",
       "system": "Tema del sistema"
-    }
+    },
+    "error": "Error"
   },
   "status": {
     "running": "En ejecución",
@@ -1916,7 +1917,11 @@
       "descKontext": "Edición con sujeto consistente (24 pasos)",
       "descFill": "Inpainting con máscara (20 pasos)",
       "keepCurrent": "Mantener {model}",
-      "classFlux2KleinEdit": "Flux2KleinEdit (edición Klein)"
+      "classFlux2KleinEdit": "Flux2KleinEdit (edición Klein)",
+      "downloadedModelsTitle": "Modelos descargados",
+      "scanningModels": "Escaneando modelos locales…",
+      "noDownloadedModels": "No se encontraron modelos de imagen descargados.",
+      "selected": "Seleccionado"
     },
     "prompt": {
       "upscale": "Ampliar",

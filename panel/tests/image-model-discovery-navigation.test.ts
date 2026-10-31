@@ -28,4 +28,10 @@ describe('Image folder picker to model discovery', () => {
       expect(picker).not.toContain(obsolete)
     }
   })
+  it('scans and presents downloaded image models with single-click folder selection', () => {
+    const picker = readFileSync(join(__dirname, '../src/renderer/src/components/image/ImageModelPicker.tsx'), 'utf8')
+    expect(picker).toContain("window.api.models.scan('image')")
+    expect(picker).toContain('data-vmlx-section="image-downloaded-models"')
+    expect(picker).toContain('data-vmlx-control="image-model-card"')
+  })
 })

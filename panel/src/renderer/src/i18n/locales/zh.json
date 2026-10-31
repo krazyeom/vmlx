@@ -61,7 +61,8 @@
       "dark": "深色主题",
       "light": "浅色主题",
       "system": "系统主题"
-    }
+    },
+    "error": "错误"
   },
   "status": {
     "running": "运行中",
@@ -1916,7 +1917,11 @@
       "descKontext": "主体一致性编辑（24 步）",
       "descFill": "蒙版修复填充（20 步）",
       "keepCurrent": "保留 {model}",
-      "classFlux2KleinEdit": "Flux2KleinEdit（Klein 编辑）"
+      "classFlux2KleinEdit": "Flux2KleinEdit（Klein 编辑）",
+      "downloadedModelsTitle": "已下载的模型",
+      "scanningModels": "正在扫描本地模型…",
+      "noDownloadedModels": "未找到已下载的图像模型。",
+      "selected": "已选择"
     },
     "prompt": {
       "upscale": "放大",

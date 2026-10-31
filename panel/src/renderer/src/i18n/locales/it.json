@@ -61,7 +61,8 @@
       "dark": "Tema oscuro",
       "light": "Tema leggero",
       "system": "Tema del sistema"
-    }
+    },
+    "error": "Errore"
   },
   "status": {
     "running": "Corsa",
@@ -1916,7 +1917,11 @@
       "descKontext": "Modifica coerente con l'oggetto (24 passaggi)",
       "descFill": "Pittura con maschera (20 passi)",
       "keepCurrent": "Mantieni {model}",
-      "classFlux2KleinEdit": "Flux2KleinModifica (modifica Klein)"
+      "classFlux2KleinEdit": "Flux2KleinModifica (modifica Klein)",
+      "downloadedModelsTitle": "Modelli scaricati",
+      "scanningModels": "Scansione dei modelli locali…",
+      "noDownloadedModels": "Nessun modello immagine scaricato trovato.",
+      "selected": "Selezionato"
     },
     "prompt": {
       "upscale": "Di lusso",

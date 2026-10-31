@@ -61,7 +61,8 @@
       "dark": "Thème sombre",
       "light": "Thème lumière",
       "system": "Thème système"
-    }
+    },
+    "error": "Erreur"
   },
   "status": {
     "running": "En cours d'exécution",
@@ -1916,7 +1917,11 @@
       "descKontext": "Édition cohérente par sujet (24 étapes)",
       "descFill": "Peinture avec masque (20 étapes)",
       "keepCurrent": "Conserver {model}",
-      "classFlux2KleinEdit": "Flux2KleinEdit (édition Klein)"
+      "classFlux2KleinEdit": "Flux2KleinEdit (édition Klein)",
+      "downloadedModelsTitle": "Modèles téléchargés",
+      "scanningModels": "Recherche des modèles locaux…",
+      "noDownloadedModels": "Aucun modèle d'image téléchargé trouvé.",
+      "selected": "Sélectionné"
     },
     "prompt": {
       "upscale": "Haut de gamme",

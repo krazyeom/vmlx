@@ -61,7 +61,8 @@
       "dark": "Dark theme",
       "light": "Light theme",
       "system": "System theme"
-    }
+    },
+    "error": "Error"
   },
   "status": {
     "running": "Running",
@@ -1916,7 +1917,11 @@
       "descKontext": "Subject-consistent editing (24 steps)",
       "descFill": "Inpainting with mask (20 steps)",
       "keepCurrent": "Keep {model}",
-      "classFlux2KleinEdit": "Flux2KleinEdit (Klein edit)"
+      "classFlux2KleinEdit": "Flux2KleinEdit (Klein edit)",
+      "downloadedModelsTitle": "Downloaded models",
+      "scanningModels": "Scanning local models…",
+      "noDownloadedModels": "No downloaded image models found.",
+      "selected": "Selected"
     },
     "prompt": {
       "upscale": "Upscale",

@@ -70,6 +70,7 @@ describe('mlxstudio#82: resolveImageModelFromDirectoryName', () => {
             expect(resolveImageModelFromDirectoryName('FLUX.1-dev-mflux-8bit')?.id).toBe('dev')
             expect(resolveImageModelFromDirectoryName('FLUX.1-schnell-mflux-4bit')?.id).toBe('schnell')
             expect(resolveImageModelFromDirectoryName('Z-Image-Turbo-mflux-8bit')?.id).toBe('z-image-turbo')
+            expect(resolveImageModelFromDirectoryName('Audante/FLUX.2-klein-4B-mflux-q4')?.id).toBe('klein-4b')
         })
 
         it('strips -mflux only', () => {

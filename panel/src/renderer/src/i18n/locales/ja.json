@@ -61,7 +61,8 @@
       "dark": "ダークテーマ",
       "light": "ライトテーマ",
       "system": "システムテーマ"
-    }
+    },
+    "error": "エラー"
   },
   "status": {
     "running": "実行中",
@@ -1916,7 +1917,11 @@
       "descKontext": "被写体を保った編集（24ステップ）",
       "descFill": "マスクによるインペインティング（20ステップ）",
       "keepCurrent": "{model} を維持",
-      "classFlux2KleinEdit": "Flux2KleinEdit（Klein 編集）"
+      "classFlux2KleinEdit": "Flux2KleinEdit（Klein 編集）",
+      "downloadedModelsTitle": "ダウンロード済みモデル",
+      "scanningModels": "ローカルモデルをスキャン中…",
+      "noDownloadedModels": "ダウンロード済みの画像モデルは見つかりませんでした。",
+      "selected": "選択中"
     },
     "prompt": {
       "upscale": "拡大",

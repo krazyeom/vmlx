@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react'
-import { FolderOpen, Play, Download } from 'lucide-react'
+import { FolderOpen, Play, Download, RefreshCw } from 'lucide-react'
 import { canLaunchInspectedImageFolder } from '../../../../shared/imageFolderLaunch'
 import type { inspectLocalImageModel } from '../../../../shared/imageLocalModel'
 import { IMAGE_MODEL_DISCOVERY_NAVIGATION } from '../../../../shared/modelDiscoveryNavigation'
@@ -29,6 +29,32 @@ export function ImageModelPicker({ onSelect, currentModel, onKeepCurrent }: Imag
   const [localPreview, setLocalPreview] = useState<ReturnType<typeof inspectLocalImageModel> | null>(null)
   const [inspecting, setInspecting] = useState(false)
   const [previewInput, setPreviewInput] = useState('')
+  const [downloadedModels, setDownloadedModels] = useState<Array<{ id: string; name: string; path: string; size?: string }>>([])
+  const [loadingModels, setLoadingModels] = useState(true)
+
+  const loadDownloadedModels = () => {
+    setLoadingModels(true)
+    window.api.models.scan('image')
+      .then((models: any[]) => {
+        setDownloadedModels(models || [])
+      })
+      .catch((err) => {
+        console.error('Failed to scan image models:', err)
+      })
+      .finally(() => {
+        setLoadingModels(false)
+      })
+  }
+
+  useEffect(() => {
+    loadDownloadedModels()
+    const unsubscribe = window.api.models.onDownloadComplete?.(() => {
+      loadDownloadedModels()
+    })
+    return () => {
+      unsubscribe?.()
+    }
+  }, [])
 
   const chooseCustomPath = (path: string) => {
     setCustomPath(path)
@@ -107,6 +133,64 @@ export function ImageModelPicker({ onSelect, currentModel, onKeepCurrent }: Imag
             className="inline-flex shrink-0 items-center gap-2 px-3 py-2 border border-border text-sm hover:bg-accent">
             <Download className="h-4 w-4" />{t('image.picker.findMfluxModels')}
           </button>
+        </div>
+        {/* Downloaded Models */}
+        <div className="border border-border p-4 min-w-0" data-vmlx-section="image-downloaded-models">
+          <div className="flex items-center justify-between mb-3">
+            <h3 className="text-sm font-medium">{t('image.picker.downloadedModelsTitle')}</h3>
+            <button
+              type="button"
+              onClick={loadDownloadedModels}
+              data-vmlx-control="image-refresh-downloaded-models"
+              className="text-xs text-muted-foreground hover:text-foreground inline-flex items-center gap-1.5 px-2 py-1 border border-border rounded"
+              title={t('image.picker.scanningModels')}
+            >
+              <RefreshCw className={`h-3 w-3 ${loadingModels ? 'animate-spin' : ''}`} />
+            </button>
+          </div>
+          {loadingModels && downloadedModels.length === 0 ? (
+            <div className="text-xs text-muted-foreground py-4 text-center">{t('image.picker.scanningModels')}</div>
+          ) : downloadedModels.length === 0 ? (
+            <div className="text-xs text-muted-foreground py-3 px-4 border border-dashed border-border rounded">
+              {t('image.picker.noDownloadedModels')}
+            </div>
+          ) : (
+            <div className="grid grid-cols-1 gap-2 max-h-60 overflow-y-auto pr-1">
+              {downloadedModels.map((model) => {
+                const isSelected = customPath.trim() === model.path
+                return (
+                  <button
+                    key={model.path}
+                    type="button"
+                    onClick={() => chooseCustomPath(model.path)}
+                    data-vmlx-control="image-model-card"
+                    className={`w-full text-left p-3 rounded border transition-colors flex items-start justify-between gap-3 ${
+                      isSelected
+                        ? 'border-primary bg-primary/10 ring-1 ring-primary'
+                        : 'border-border hover:border-primary/50 hover:bg-accent'
+                    }`}
+                  >
+                    <div className="min-w-0 flex-1">
+                      <div className="flex items-center gap-2">
+                        <span className="font-medium text-sm truncate">{model.name}</span>
+                        {isSelected && (
+                          <span className="text-[10px] bg-primary text-primary-foreground px-1.5 py-0.5 rounded font-semibold shrink-0">
+                            {t('image.picker.selected')}
+                          </span>
+                        )}
+                      </div>
+                      <div className="text-xs text-muted-foreground truncate mt-0.5">{model.path}</div>
+                      {model.size && (
+                        <div className="text-[11px] text-muted-foreground mt-1">
+                          {model.size}
+                        </div>
+                      )}
+                    </div>
+                  </button>
+                )
+              })}
+            </div>
+          )}
         </div>
         {/* Custom Model */}
         <div className="border border-border p-4 min-w-0" data-vmlx-section="image-folder-selection">

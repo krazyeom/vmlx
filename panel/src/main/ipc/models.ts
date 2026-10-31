@@ -614,6 +614,7 @@ const IMAGE_SETTINGS_KEY = "image_model_scan_directories";
 const BUILTIN_IMAGE_PATHS = [
   join(homedir(), ".mlxstudio/models/image"),
   join(homedir(), ".mlxstudio/models/xcreates"),
+  join(homedir(), ".cache/huggingface/hub"),
 ];
 
 // ─── Image Model HF Repo Mapping ────────────────────────────────────────────
@@ -1183,8 +1184,13 @@ export function registerModelHandlers(): void {
     // undefined: return all models (no filtering)
     let skipDirs: Set<string> | undefined;
     if (modelType === "text") {
+      const textDirs = new Set(dirs.map((d) => d.replace(/\/+$/, "")));
       const imageDirs = getModelDirectories("image");
-      skipDirs = new Set(imageDirs.map((d) => d.replace(/\/+$/, "")));
+      skipDirs = new Set(
+        imageDirs
+          .map((d) => d.replace(/\/+$/, ""))
+          .filter((d) => !textDirs.has(d))
+      );
     }
     const scanFilter =
       modelType === "image"
