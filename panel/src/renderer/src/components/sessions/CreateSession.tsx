@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from 'react'
-import { ArrowLeft } from 'lucide-react'
+import { ArrowLeft, Download, Loader2, CheckCircle2, AlertCircle, X } from 'lucide-react'
 import {
   SessionConfigForm,
   SessionConfig,
@@ -19,6 +19,25 @@ import {
 } from '../../../../shared/sessionGenerationDefaults'
 import { usesExactTypedPromptDiskCache, usesGlmNativeSsdPool } from '../../../../shared/detectedFamilyNames'
 import { resolveNativeMtpStartupMode } from '../../../../shared/nativeMtpLaunchArgs'
+
+const DEFAULT_RECOMMENDED_REPO = 'mlx-community/Llama-3.2-3B-Instruct-4bit'
+
+interface InlineDownloadProgress {
+  percent: number
+  speed?: string
+  downloaded?: string
+  total?: string
+  eta?: string
+  currentFile?: string
+}
+
+interface InlineDownloadState {
+  jobId?: string
+  repoId: string
+  status: 'idle' | 'downloading' | 'complete' | 'error'
+  progress?: InlineDownloadProgress
+  error?: string
+}
 
 interface ModelInfo {
   path: string
@@ -86,6 +105,7 @@ export function CreateSession({ initialModelPath, onBack, onCreated, filterType:
   const [remoteModel, setRemoteModel] = useState('')
   const [remoteOrganization, setRemoteOrganization] = useState('')
   const [remoteConnecting, setRemoteConnecting] = useState(false)
+  const [inlineDownload, setInlineDownload] = useState<InlineDownloadState | null>(null)
 
   const appliedStepRecommendationRef = useRef<number | undefined>(undefined)
 
@@ -216,7 +236,122 @@ export function CreateSession({ initialModelPath, onBack, onCreated, filterType:
   useEffect(() => {
     scanModels()
     loadDirectories()
+
+    // Restore any active download for the default starter model
+    window.api.models.getDownloadStatus?.().then((status: any) => {
+      if (!status) return
+      const targetRepo = DEFAULT_RECOMMENDED_REPO
+      const active = status.activeAll?.find((a: any) => a.repoId === targetRepo) ||
+        (status.active?.repoId === targetRepo ? status.active : null)
+      if (active) {
+        setInlineDownload({
+          jobId: active.jobId,
+          repoId: active.repoId,
+          status: 'downloading',
+          progress: active.progress ? {
+            percent: active.progress.percent ?? 0,
+            speed: active.progress.speed,
+            downloaded: active.progress.downloaded,
+            total: active.progress.total,
+            eta: active.progress.eta,
+            currentFile: active.progress.currentFile
+          } : { percent: 0 }
+        })
+      }
+    }).catch(() => {})
+
+    const unsubStarted = window.api.models.onDownloadStarted?.((data: any) => {
+      if (data.repoId === DEFAULT_RECOMMENDED_REPO) {
+        setInlineDownload(prev => ({
+          jobId: data.jobId,
+          repoId: data.repoId,
+          status: 'downloading',
+          progress: prev?.progress || { percent: 0 }
+        }))
+      }
+    })
+
+    const unsubProgress = window.api.models.onDownloadProgress?.((data: any) => {
+      setInlineDownload(prev => {
+        if (!prev || (prev.jobId && prev.jobId !== data.jobId && prev.repoId !== data.repoId)) return prev
+        return {
+          ...prev,
+          jobId: data.jobId || prev.jobId,
+          status: 'downloading',
+          progress: {
+            percent: data.progress?.percent ?? 0,
+            speed: data.progress?.speed,
+            downloaded: data.progress?.downloaded,
+            total: data.progress?.total,
+            eta: data.progress?.eta,
+            currentFile: data.progress?.currentFile
+          }
+        }
+      })
+    })
+
+    const unsubComplete = window.api.models.onDownloadComplete?.((data: any) => {
+      setInlineDownload(prev => {
+        if (!prev || (prev.jobId && prev.jobId !== data.jobId && prev.repoId !== data.repoId)) return prev
+        if (data.status === 'complete') {
+          scanModels()
+          return {
+            ...prev,
+            status: 'complete',
+            progress: { percent: 100 }
+          }
+        } else if (data.status === 'cancelled') {
+          return null
+        }
+        return prev
+      })
+    })
+
+    const unsubError = window.api.models.onDownloadError?.((data: any) => {
+      setInlineDownload(prev => {
+        if (!prev || (prev.jobId && prev.jobId !== data.jobId && prev.repoId !== data.repoId)) return prev
+        return {
+          ...prev,
+          status: 'error',
+          error: data.error || t('common.error')
+        }
+      })
+    })
+
+    return () => {
+      unsubStarted?.()
+      unsubProgress?.()
+      unsubComplete?.()
+      unsubError?.()
+    }
   }, [])
+
+  const handleStartDefaultDownload = async (repoId: string = DEFAULT_RECOMMENDED_REPO) => {
+    setInlineDownload({
+      repoId,
+      status: 'downloading',
+      progress: { percent: 0 }
+    })
+    try {
+      const res = await window.api.models.startDownload(repoId)
+      if (res?.jobId) {
+        setInlineDownload(prev => prev ? { ...prev, jobId: res.jobId } : null)
+      }
+    } catch (err: any) {
+      setInlineDownload({
+        repoId,
+        status: 'error',
+        error: err?.message || 'Download failed'
+      })
+    }
+  }
+
+  const handleCancelDefaultDownload = async () => {
+    if (inlineDownload?.jobId) {
+      await window.api.models.cancelDownload(inlineDownload.jobId)
+    }
+    setInlineDownload(null)
+  }
 
   // Auto-assign next available port
   useEffect(() => {
@@ -671,27 +806,121 @@ export function CreateSession({ initialModelPath, onBack, onCreated, filterType:
               {scanLoading ? (
                 <p className="text-muted-foreground">{t('sessions.create.scanning')}</p>
               ) : filteredModels.length === 0 ? (
-                <div className="text-center py-8">
-                  <p className="text-muted-foreground mb-2">{t('sessions.create.noModels')}</p>
-                  <p className="text-xs text-muted-foreground mb-4">
-                    {t('sessions.create.noModelsHelp')}
-                  </p>
-                  <div className="mb-4 p-3 bg-card border border-border rounded-lg text-left">
-                    <p className="text-xs text-muted-foreground mb-2">{t('sessions.create.downloadHint')}</p>
-                    <div className="p-2 bg-muted rounded font-mono text-[11px] text-foreground select-all">
-                      huggingface-cli download mlx-community/Llama-3.2-3B-Instruct-4bit --local-dir ~/.cache/huggingface/hub/mlx-community/Llama-3.2-3B-Instruct-4bit
-                    </div>
-                    <p className="text-[10px] text-muted-foreground mt-2">
-                      {t('sessions.create.browseModels')}{' '}
-                      <span className="text-primary select-all">huggingface.co/mlx-community</span>
+                <div className="text-center py-6 max-w-xl mx-auto space-y-4">
+                  <div>
+                    <p className="text-base font-semibold text-foreground mb-1">{t('sessions.create.noModels')}</p>
+                    <p className="text-xs text-muted-foreground">
+                      {t('sessions.create.noModelsHelp')}
                     </p>
                   </div>
-                  <button
-                    onClick={() => setShowDirManager(true)}
-                    className="px-4 py-2 text-sm border border-border rounded hover:bg-accent"
-                  >
-                    {t('sessions.create.manageDirectories')}
-                  </button>
+
+                  {/* Recommended Starter Model Card */}
+                  <div className="p-4 bg-card border border-primary/20 rounded-xl text-left shadow-sm space-y-3">
+                    <div className="flex items-start justify-between gap-3">
+                      <div>
+                        <div className="flex items-center gap-2 mb-1 flex-wrap">
+                          <span className="text-[11px] font-semibold px-2 py-0.5 rounded bg-primary/10 text-primary border border-primary/20">
+                            {t('sessions.create.starterBadge')}
+                          </span>
+                          <span className="text-sm font-semibold text-foreground select-all font-mono">
+                            {DEFAULT_RECOMMENDED_REPO}
+                          </span>
+                        </div>
+                        <p className="text-xs text-muted-foreground">
+                          {t('sessions.create.starterModelDesc')}
+                        </p>
+                      </div>
+                    </div>
+
+                    {/* Download Progress / Actions */}
+                    {inlineDownload?.status === 'downloading' ? (
+                      <div className="space-y-2.5 pt-2 border-t border-border">
+                        <div className="flex items-center justify-between text-xs">
+                          <span className="flex items-center gap-1.5 text-primary font-medium">
+                            <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                            {t('sessions.create.downloading')} ({inlineDownload.progress?.percent ?? 0}%)
+                          </span>
+                          <button
+                            type="button"
+                            onClick={handleCancelDefaultDownload}
+                            className="text-xs text-muted-foreground hover:text-destructive flex items-center gap-1"
+                          >
+                            <X className="h-3 w-3" />
+                            {t('sessions.create.cancelDownload')}
+                          </button>
+                        </div>
+                        <div className="h-2.5 bg-muted rounded-full overflow-hidden">
+                          <div
+                            className="h-full bg-primary rounded-full transition-all duration-300"
+                            style={{ width: `${Math.min(inlineDownload.progress?.percent || 0, 100)}%` }}
+                          />
+                        </div>
+                        <div className="flex items-center justify-between text-[11px] text-muted-foreground">
+                          <span>
+                            {inlineDownload.progress?.downloaded && inlineDownload.progress?.total
+                              ? `${inlineDownload.progress.downloaded} / ${inlineDownload.progress.total}`
+                              : inlineDownload.progress?.currentFile || ''}
+                          </span>
+                          <div className="flex items-center gap-2">
+                            {inlineDownload.progress?.speed && <span>{inlineDownload.progress.speed}</span>}
+                            {inlineDownload.progress?.eta && <span>{inlineDownload.progress.eta}</span>}
+                          </div>
+                        </div>
+                      </div>
+                    ) : inlineDownload?.status === 'complete' ? (
+                      <div className="flex items-center gap-2 p-2.5 bg-green-500/10 text-green-600 dark:text-green-400 border border-green-500/20 rounded-lg text-xs font-medium">
+                        <CheckCircle2 className="h-4 w-4 flex-shrink-0" />
+                        <span>{t('sessions.create.downloadComplete')}</span>
+                      </div>
+                    ) : (
+                      <div className="pt-2 border-t border-border flex flex-wrap items-center gap-2">
+                        {inlineDownload?.status === 'error' && (
+                          <div className="w-full mb-1 flex items-center gap-1.5 text-xs text-destructive">
+                            <AlertCircle className="h-3.5 w-3.5 flex-shrink-0" />
+                            <span>{inlineDownload.error}</span>
+                          </div>
+                        )}
+                        <button
+                          type="button"
+                          onClick={() => handleStartDefaultDownload(DEFAULT_RECOMMENDED_REPO)}
+                          className="px-4 py-2 bg-primary text-primary-foreground text-xs font-semibold rounded-lg hover:bg-primary/90 flex items-center gap-2 transition-all shadow-sm"
+                        >
+                          <Download className="h-4 w-4" />
+                          {inlineDownload?.status === 'error'
+                            ? t('sessions.create.retryDownload')
+                            : t('sessions.create.downloadStarterModel')}
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => setSessionType('download')}
+                          className="px-3 py-2 border border-border text-xs rounded-lg hover:bg-accent text-muted-foreground hover:text-foreground transition-colors"
+                        >
+                          {t('sessions.create.browseMoreModels')}
+                        </button>
+                      </div>
+                    )}
+
+                    {/* Terminal command snippet */}
+                    <div className="pt-2 text-[11px] text-muted-foreground border-t border-border/50">
+                      <p className="mb-1">{t('sessions.create.orTerminalCommand')}</p>
+                      <div className="p-2 bg-muted rounded font-mono text-[11px] text-foreground select-all break-all">
+                        huggingface-cli download mlx-community/Llama-3.2-3B-Instruct-4bit --local-dir ~/.cache/huggingface/hub/mlx-community/Llama-3.2-3B-Instruct-4bit
+                      </div>
+                      <p className="text-[10px] text-muted-foreground mt-2">
+                        {t('sessions.create.browseModels')}{' '}
+                        <span className="text-primary select-all">huggingface.co/mlx-community</span>
+                      </p>
+                    </div>
+                  </div>
+
+                  <div className="flex justify-center">
+                    <button
+                      onClick={() => setShowDirManager(true)}
+                      className="px-3 py-1.5 text-xs border border-border rounded hover:bg-accent text-muted-foreground"
+                    >
+                      {t('sessions.create.manageDirectories')}
+                    </button>
+                  </div>
                 </div>
               ) : (
                 <div className="space-y-1">

@@ -437,7 +437,7 @@ export function DownloadTab({ onDownloadComplete, initialModelType = 'text' }: D
               {macSpecs.chipName}
             </span>
             <span className="px-2 py-0.5 rounded bg-muted text-foreground font-medium border border-border whitespace-nowrap">
-              {macSpecs.totalRamGb} GB Unified Memory
+              {`${macSpecs.totalRamGb} GB`}
             </span>
             <span className="text-muted-foreground hidden md:inline whitespace-nowrap">
               {t('sessions.download.macSpecsBanner', {
@@ -464,7 +464,6 @@ export function DownloadTab({ onDownloadComplete, initialModelType = 'text' }: D
               target="_blank"
               rel="noopener noreferrer"
               className="text-primary hover:underline flex items-center gap-0.5 text-xs ml-1"
-              title="https://mlx.app/ko/mac"
             >
               <span>{t('sessions.download.macGuideLink')}</span>
               <span>↗</span>
@@ -812,7 +811,7 @@ export function DownloadTab({ onDownloadComplete, initialModelType = 'text' }: D
                     </div>
                     <p className="text-[11px] leading-relaxed opacity-90 mt-1">{fit.detailMessage}</p>
                     <div className="mt-2 pt-1.5 border-t border-current/15 flex items-center justify-between text-[10px] opacity-75">
-                      <span>{t('sessions.download.fit.currentMac')}: {macSpecs.chipName} ({macSpecs.totalRamGb} GB)</span>
+                      <span>{t('sessions.download.fit.currentMac')}: {`${macSpecs.chipName} (${macSpecs.totalRamGb} GB)`}</span>
                       <a href="https://mlx.app/ko/mac" target="_blank" rel="noopener noreferrer" className="underline hover:opacity-100">
                         {t('sessions.download.macGuideLink')} ↗
                       </a>
