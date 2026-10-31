@@ -37,6 +37,15 @@ export function navigateFromMenu(action: NativeNavigationAction, getWindow: () =
 }
 
 export function installApplicationMenu(getWindow: () => BrowserWindow | null): void {
+  if (process.platform === 'darwin') {
+    app.setAboutPanelOptions({
+      applicationName: 'vMLX',
+      applicationVersion: app.getVersion(),
+      copyright: 'Copyright 2026 JANGQ AI & krazyeom. All rights reserved.',
+      credits: 'Jinho Jang, krazyeom',
+      authors: ['Jinho Jang', 'krazyeom']
+    })
+  }
   const go = (action: NativeNavigationAction) => () => navigateFromMenu(action, getWindow)
   const preferences = { label: t('console.preferences'), accelerator: 'CmdOrCtrl+,', click: go('preferences') }
   const template: Electron.MenuItemConstructorOptions[] = [

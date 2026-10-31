@@ -88,7 +88,7 @@
   "build": {
     "appId": "net.vmlx.app",
     "productName": "vMLX",
-    "copyright": "Copyright 2026 JANGQ AI. All rights reserved.",
+    "copyright": "Copyright 2026 JANGQ AI & krazyeom. All rights reserved.",
     "beforePack": "scripts/electron-builder-before-pack.cjs",
     "afterPack": "scripts/electron-builder-after-pack.cjs",
     "artifactBuildStarted": "scripts/electron-builder-after-all-artifact-build.cjs",

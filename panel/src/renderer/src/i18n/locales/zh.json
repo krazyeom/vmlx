@@ -250,7 +250,7 @@
       "language": "语言",
       "settings": "关于 & 设置",
       "version": "版本 {version}",
-      "copyright": "© {year} Eric Jang。保留所有权利。",
+      "copyright": "© {year} Eric Jang 和 krazyeom。保留所有权利。",
       "apiKeysTitle": "API 密钥",
       "braveKey": "Brave Search API 密钥",
       "braveRequired": "启用内置工具时，web_search 工具需要此密钥。",

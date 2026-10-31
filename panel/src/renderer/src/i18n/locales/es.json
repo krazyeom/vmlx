@@ -250,7 +250,7 @@
       "language": "Idioma",
       "settings": "Acerca de y configuración",
       "version": "Versión {version}",
-      "copyright": "© {year} Eric Jang. Todos los derechos reservados.",
+      "copyright": "© {year} Eric Jang y krazyeom. Todos los derechos reservados.",
       "apiKeysTitle": "Claves de API",
       "braveKey": "Clave de API de Brave Search",
       "braveRequired": "Necesaria para la herramienta web_search cuando las herramientas integradas están activadas.",

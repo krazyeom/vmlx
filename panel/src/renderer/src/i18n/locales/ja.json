@@ -250,7 +250,7 @@
       "language": "言語",
       "settings": "情報と設定",
       "version": "バージョン {version}",
-      "copyright": "© {year} Eric Jang. 無断複写・転載を禁じます。",
+      "copyright": "© {year} Eric Jang & krazyeom. 無断複写・転載を禁じます。",
       "apiKeysTitle": "API キー",
       "braveKey": "Brave Search API キー",
       "braveRequired": "組み込みツールが有効な場合、web_search ツールに必要です。",
