@@ -81,6 +81,7 @@ declare global {
           supportsThinkingBudget?: boolean;
           source?: "jang_config" | "generation_config";
         } | null>;
+        getMacSpecs: () => Promise<import('./shared/modelMemoryFit').MacHardwareSpecs>;
         searchHF: (
           query: string,
           sortBy?: string,
@@ -96,13 +97,14 @@ declare global {
             tags: string[];
             pipelineTag?: string;
             size?: string;
+            note?: string;
           }>
         >;
         fetchReadme: (repoId: string) => Promise<string | null>;
         getRecentModels: (author: string, sort: 'createdAt' | 'lastModified') => Promise<Array<{
           id: string; author: string; downloads: number; likes: number;
           createdAt: string; lastModified: string; tags: string[];
-          pipelineTag?: string; size?: string;
+          pipelineTag?: string; size?: string; note?: string;
         }>>;
         getRecommendedModels: () => Promise<
           Array<{
@@ -113,6 +115,8 @@ declare global {
             lastModified: string;
             tags: string[];
             pipelineTag?: string;
+            size?: string;
+            note?: string;
           }>
         >;
         getCollectionModels: (slug: string) => Promise<

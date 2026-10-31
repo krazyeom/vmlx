@@ -31,6 +31,8 @@ const api = {
     detectConfig: (modelPath: string) => ipcRenderer.invoke('models:detect-config', modelPath),
     detectTypes: (modelPaths: string[]) => ipcRenderer.invoke('models:detectTypes', modelPaths),
     getGenerationDefaults: (modelPath: string) => ipcRenderer.invoke('models:getGenerationDefaults', modelPath),
+    // Mac hardware specs for memory fit evaluation
+    getMacSpecs: () => ipcRenderer.invoke('models:getMacSpecs'),
     // HuggingFace search & download
     searchHF: (query: string, sortBy?: string, sortDir?: string, modelType?: string) => ipcRenderer.invoke('models:searchHF', query, sortBy, sortDir, modelType),
     fetchReadme: (repoId: string) => ipcRenderer.invoke('models:fetchReadme', repoId),

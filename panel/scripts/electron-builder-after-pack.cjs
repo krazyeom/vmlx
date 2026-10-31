@@ -24,6 +24,11 @@ function walk(dir, out = []) {
 }
 
 function isMachO(path) {
+  // Fast path: Mach-O binaries in Python environments are .so, .dylib, or extensionless executables
+  if (!path.endsWith('.so') && !path.endsWith('.dylib')) {
+    const base = basename(path)
+    if (base.includes('.')) return false
+  }
   const proc = spawnSync('file', ['-b', path], {
     stdio: 'pipe',
     encoding: 'utf8',

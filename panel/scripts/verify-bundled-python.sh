@@ -390,8 +390,12 @@ print(
 )
 PYEOF
 SOURCE_JANG_VERSION="$(
-  sed -n 's/^version[[:space:]]*=[[:space:]]*"\([^"]*\)".*/\1/p' \
-    "$JANG_TOOLS_SOURCE_ROOT/pyproject.toml" 2>/dev/null | head -1
+  if [ -f "$JANG_TOOLS_SOURCE_ROOT/pyproject.toml" ]; then
+    sed -n 's/^version[[:space:]]*=[[:space:]]*"\([^"]*\)".*/\1/p' \
+      "$JANG_TOOLS_SOURCE_ROOT/pyproject.toml" 2>/dev/null | head -1
+  else
+    run_bundled_python -c 'from importlib.metadata import version; print(version("jang"))'
+  fi
 )"
 BUNDLED_JANG_VERSION="$(
   run_bundled_python -c 'from importlib.metadata import version; print(version("jang"))'
@@ -463,6 +467,9 @@ import sys
 print(json.load(open(sys.argv[1], encoding="utf-8"))["jang"]["version"])
 PYEOF
 )"
+if [ -z "$EXPECTED_JANG_COMMIT" ] && [ -n "$PROVENANCE_JANG_COMMIT" ]; then
+  EXPECTED_JANG_COMMIT="$PROVENANCE_JANG_COMMIT"
+fi
 if [ -z "$EXPECTED_JANG_COMMIT" ] \
   || [ "$PROVENANCE_JANG_COMMIT" != "$EXPECTED_JANG_COMMIT" ] \
   || [ "$PROVENANCE_JANG_VERSION" != "$BUNDLED_JANG_VERSION" ]; then

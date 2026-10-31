@@ -4,6 +4,13 @@ import { normalizeHfEndpointSetting } from '../../../../shared/hfSettings'
 import { HF_MODEL_FEED_AUTHORS, type HfModelFeedSort } from '../../../../shared/hfModelFeed'
 import { useTranslation } from '../../i18n'
 import type { DownloadModelType } from '../../../../shared/modelDiscoveryNavigation'
+import {
+  type MacHardwareSpecs,
+  type MacMemorySortOrder,
+  evaluateModelFit,
+  sortModelsByMacMemory,
+  type ModelFitEvaluation,
+} from '../../../../shared/modelMemoryFit'
 
 interface HFModel {
   id: string
@@ -97,6 +104,18 @@ export function DownloadTab({ onDownloadComplete, initialModelType = 'text' }: D
   const [selectedModel, setSelectedModel] = useState<HFModel | null>(null)
   const [selectedReadme, setSelectedReadme] = useState<string | null>(null)
   const [loadingReadme, setLoadingReadme] = useState(false)
+  const [readmeCache, setReadmeCache] = useState<Record<string, string>>({})
+
+  // Mac hardware specs & fit filter
+  const [macSpecs, setMacSpecs] = useState<MacHardwareSpecs | null>(null)
+  const [macMemorySortOrder, setMacMemorySortOrder] = useState<MacMemorySortOrder>('compatibility')
+  const [filterCompatibleOnly, setFilterCompatibleOnly] = useState(false)
+  const [confirmOomModal, setConfirmOomModal] = useState<{
+    open: boolean
+    repoId: string
+    reqText: string
+    explanation: string
+  } | null>(null)
 
   const searchTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
   const searchRevision = useRef(0)
@@ -110,6 +129,7 @@ export function DownloadTab({ onDownloadComplete, initialModelType = 'text' }: D
 
   // Load recommended models, download dir, and HF token on mount
   useEffect(() => {
+    window.api.models.getMacSpecs().then(setMacSpecs).catch((err) => console.error('Failed to get Mac specs:', err))
     window.api.models.getDownloadDir().then(setDownloadDir)
     window.api.settings.has('hf_api_key').then((exists: boolean) => {
       setHasSavedHfToken(exists)
@@ -317,6 +337,22 @@ export function DownloadTab({ onDownloadComplete, initialModelType = 'text' }: D
     }
   }
 
+  const handleDownloadAttempt = (repoId: string, fit: ModelFitEvaluation) => {
+    if (fit.status === 'too_big') {
+      const reqText = fit.requiredMacGb
+        ? `${fit.requiredMacGb} GB Mac`
+        : (fit.estimatedNeedsGb ? `약 ${fit.estimatedNeedsGb} GB` : '대용량 메모리')
+      setConfirmOomModal({
+        open: true,
+        repoId,
+        reqText,
+        explanation: fit.detailMessage,
+      })
+      return
+    }
+    handleDownload(repoId)
+  }
+
   const handleSaveHfToken = async (token: string) => {
     setHfTokenSaving(true)
     try {
@@ -379,10 +415,77 @@ export function DownloadTab({ onDownloadComplete, initialModelType = 'text' }: D
 
   const activeCollection = collectionModels[collectionKey] || []
   const displayModels = searchQuery.trim() ? searchResults : activeCollection
+  const filteredDisplayModels = filterCompatibleOnly && macSpecs
+    ? displayModels.filter(m => evaluateModelFit(m, macSpecs, readmeCache[m.id], t).status !== 'too_big')
+    : displayModels
+  const sortedDisplayModels = sortModelsByMacMemory(
+    filteredDisplayModels,
+    macSpecs,
+    readmeCache,
+    macMemorySortOrder
+  )
   const isCollectionLoading = !searchQuery.trim() && !!loadingCollectionTabs[collectionKey]
 
   return (
     <div className="space-y-4">
+      {/* Mac Specs & Memory Guidance Banner */}
+      {macSpecs && (
+        <div className="flex flex-wrap items-center justify-between gap-2.5 p-3 bg-muted/40 border border-border rounded-lg text-xs">
+          <div className="flex items-center gap-2 min-w-0 flex-wrap">
+            <span className="text-base select-none">🖥️</span>
+            <span className="px-2 py-0.5 rounded bg-primary/10 text-primary font-semibold border border-primary/20 whitespace-nowrap">
+              {macSpecs.chipName}
+            </span>
+            <span className="px-2 py-0.5 rounded bg-muted text-foreground font-medium border border-border whitespace-nowrap">
+              {macSpecs.totalRamGb} GB Unified Memory
+            </span>
+            <span className="text-muted-foreground hidden md:inline whitespace-nowrap">
+              {t('sessions.download.macSpecsBanner', {
+                chip: macSpecs.chipName,
+                ram: macSpecs.totalRamGb,
+                gpuLimit: macSpecs.gpuDefaultLimitGb,
+              })}
+            </span>
+          </div>
+          <div className="flex flex-wrap items-center gap-2 flex-shrink-0">
+            <div className="flex items-center gap-1.5">
+              <span className="text-muted-foreground whitespace-nowrap">{t('sessions.download.sortOrderLabel')}</span>
+              <select
+                value={macMemorySortOrder}
+                onChange={(e) => setMacMemorySortOrder(e.target.value as MacMemorySortOrder)}
+                className="px-2 py-1 bg-background border border-border rounded text-xs text-foreground cursor-pointer hover:border-primary/50 transition-colors"
+                title={t('sessions.download.sortOrderTooltip')}
+              >
+                <option value="compatibility">{t('sessions.download.sortOrderCompatibility')}</option>
+                <option value="comfortable">{t('sessions.download.sortOrderComfortable')}</option>
+                <option value="fullest_ram">{t('sessions.download.sortOrderFullestRam')}</option>
+              </select>
+            </div>
+            <button
+              type="button"
+              onClick={() => setFilterCompatibleOnly(prev => !prev)}
+              className={`px-2.5 py-1 rounded text-xs border transition-colors ${
+                filterCompatibleOnly
+                  ? 'bg-primary/20 border-primary text-primary font-medium'
+                  : 'border-border text-muted-foreground hover:bg-accent hover:text-foreground'
+              }`}
+            >
+              {filterCompatibleOnly ? '✓ ' : ''}{t('sessions.download.filterCompatibleOnly')}
+            </button>
+            <a
+              href="https://mlx.app/ko/mac"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-primary hover:underline flex items-center gap-0.5 text-xs ml-1"
+              title="https://mlx.app/ko/mac"
+            >
+              <span>{t('sessions.download.macGuideLink')}</span>
+              <span>↗</span>
+            </a>
+          </div>
+        </div>
+      )}
+
       <div className="flex items-center justify-between">
         <p className="text-sm text-muted-foreground">
           {t('sessions.download.intro')}
@@ -621,12 +724,12 @@ export function DownloadTab({ onDownloadComplete, initialModelType = 'text' }: D
                   {t('common.retry')}
                 </button>
               </div>
-            ) : displayModels.length === 0 ? (
+            ) : sortedDisplayModels.length === 0 ? (
               <p className="text-sm text-muted-foreground py-4 text-center">
                 {modelType === 'image' ? t('sessions.download.noImageModels') : searchQuery.trim() ? t('sessions.download.noMlxModels') : t('sessions.download.noFeedModels')}
               </p>
             ) : (
-              displayModels.map(model => (
+              sortedDisplayModels.map(model => (
                 <div key={model.id} onClick={() => {
                   const request = ++readmeRequestRef.current
                   setSelectedModel(model)
@@ -635,6 +738,7 @@ export function DownloadTab({ onDownloadComplete, initialModelType = 'text' }: D
                   window.api.models.fetchReadme(model.id).then(text => {
                     if (request !== readmeRequestRef.current) return
                     setSelectedReadme(text || t('sessions.download.noReadme'))
+                    if (text) setReadmeCache(prev => ({ ...prev, [model.id]: text }))
                     setLoadingReadme(false)
                   }).catch(() => {
                     if (request !== readmeRequestRef.current) return
@@ -644,10 +748,13 @@ export function DownloadTab({ onDownloadComplete, initialModelType = 'text' }: D
                 }} className={`cursor-pointer ${selectedModel?.id === model.id ? 'ring-1 ring-primary rounded' : ''}`}>
                   <ModelCard
                     model={model}
+                    macSpecs={macSpecs}
+                    readmeSnippet={readmeCache[model.id]}
                     dateField={!searchQuery.trim() && modelType === 'text' ? feedSort : undefined}
                     isDownloading={downloadingRepos.has(model.id)}
                     isDownloaded={localModelIds.has(model.id)}
                     onDownload={() => handleDownload(model.id)}
+                    onConfirmTooBig={(repoId, fit) => handleDownloadAttempt(repoId, fit)}
                   />
                 </div>
               ))
@@ -663,6 +770,46 @@ export function DownloadTab({ onDownloadComplete, initialModelType = 'text' }: D
                 <h3 className="text-sm font-semibold truncate">{selectedModel.id}</h3>
                 {selectedModel.size && <span className="text-xs font-bold text-foreground ml-2 flex-shrink-0">{selectedModel.size}</span>}
               </div>
+
+              {/* Mac Compatibility Diagnosis Card */}
+              {macSpecs && (() => {
+                const fit = evaluateModelFit(selectedModel, macSpecs, selectedReadme || readmeCache[selectedModel.id], t)
+                return (
+                  <div className={`p-2.5 mb-2 rounded-lg border text-xs transition-colors ${
+                    fit.status === 'too_big'
+                      ? 'bg-rose-500/10 border-rose-500/30 text-rose-300'
+                      : fit.status === 'runs_well'
+                      ? 'bg-emerald-500/10 border-emerald-500/30 text-emerald-300'
+                      : fit.status === 'tight' || fit.status === 'slow'
+                      ? 'bg-amber-500/10 border-amber-500/30 text-amber-300'
+                      : 'bg-muted/40 border-border text-muted-foreground'
+                  }`}>
+                    <div className="flex items-center justify-between font-semibold mb-1">
+                      <span className="flex items-center gap-1.5 text-xs">
+                        <span className="font-bold">{fit.status === 'too_big' ? '✕' : fit.status === 'runs_well' ? '✓' : '⚠'}</span>
+                        <span>{t('sessions.download.fit.diagnosisTitle')}</span>
+                      </span>
+                      <span className={`px-2 py-0.5 rounded text-[10px] font-bold border ${
+                        fit.status === 'too_big'
+                          ? 'bg-rose-500/20 border-rose-500/40 text-rose-200'
+                          : fit.status === 'runs_well'
+                          ? 'bg-emerald-500/20 border-emerald-500/40 text-emerald-200'
+                          : 'bg-amber-500/20 border-amber-500/40 text-amber-200'
+                      }`}>
+                        {fit.badgeLabel}
+                      </span>
+                    </div>
+                    <p className="text-[11px] leading-relaxed opacity-90 mt-1">{fit.detailMessage}</p>
+                    <div className="mt-2 pt-1.5 border-t border-current/15 flex items-center justify-between text-[10px] opacity-75">
+                      <span>{t('sessions.download.fit.currentMac')}: {macSpecs.chipName} ({macSpecs.totalRamGb} GB)</span>
+                      <a href="https://mlx.app/ko/mac" target="_blank" rel="noopener noreferrer" className="underline hover:opacity-100">
+                        {t('sessions.download.macGuideLink')} ↗
+                      </a>
+                    </div>
+                  </div>
+                )
+              })()}
+
               <div className="flex-1 overflow-y-auto">
                 {loadingReadme ? (
                   <p className="text-xs text-muted-foreground py-4">{t('sessions.download.loadingReadme')}</p>
@@ -678,6 +825,60 @@ export function DownloadTab({ onDownloadComplete, initialModelType = 'text' }: D
           )}
         </div>
       </div>
+
+      {/* OOM Confirmation Modal */}
+      {confirmOomModal && confirmOomModal.open && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-background/80 backdrop-blur-sm p-4">
+          <div className="w-full max-w-md bg-card border border-rose-500/40 rounded-xl shadow-xl p-5 space-y-4">
+            <div className="flex items-start gap-3">
+              <span className="text-2xl text-rose-500 select-none">⚠️</span>
+              <div>
+                <h4 className="font-semibold text-sm text-foreground">
+                  {t('sessions.download.fit.confirmDownloadTitle')}
+                </h4>
+                <p className="text-xs text-muted-foreground mt-1 font-mono break-all">
+                  {confirmOomModal.repoId}
+                </p>
+              </div>
+            </div>
+
+            <div className="p-3 bg-rose-500/10 border border-rose-500/20 rounded-lg text-xs text-rose-300 leading-relaxed space-y-2">
+              <p>
+                {t('sessions.download.fit.confirmDownloadBody', {
+                  req: confirmOomModal.reqText,
+                  current: `${macSpecs?.totalRamGb || 0} GB`,
+                })}
+              </p>
+              {confirmOomModal.explanation && (
+                <p className="text-[11px] opacity-80 pt-1 border-t border-rose-500/20">
+                  {confirmOomModal.explanation}
+                </p>
+              )}
+            </div>
+
+            <div className="flex items-center justify-end gap-2 pt-1">
+              <button
+                type="button"
+                onClick={() => setConfirmOomModal(null)}
+                className="px-3 py-1.5 text-xs rounded border border-border hover:bg-accent text-foreground"
+              >
+                {t('sessions.download.fit.cancel')}
+              </button>
+              <button
+                type="button"
+                onClick={() => {
+                  const id = confirmOomModal.repoId
+                  setConfirmOomModal(null)
+                  handleDownload(id)
+                }}
+                className="px-3 py-1.5 text-xs bg-rose-600 hover:bg-rose-700 text-white font-medium rounded transition-colors"
+              >
+                {t('sessions.download.fit.proceedDownload')}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   )
 }
@@ -735,25 +936,65 @@ function ReadmeContent({ markdown }: { markdown: string }) {
   )
 }
 
-function ModelCard({ model, isDownloading, isDownloaded, onDownload, dateField }: {
+function ModelCard({
+  model,
+  macSpecs,
+  readmeSnippet,
+  isDownloading,
+  isDownloaded,
+  onDownload,
+  onConfirmTooBig,
+  dateField,
+}: {
   model: HFModel
+  macSpecs: MacHardwareSpecs | null
+  readmeSnippet?: string
   dateField?: HfModelFeedSort
   isDownloading: boolean
   isDownloaded: boolean
   onDownload: () => void
+  onConfirmTooBig: (repoId: string, fit: ModelFitEvaluation) => void
 }) {
   const { t } = useTranslation()
   const shortName = model.id.includes('/') ? model.id.split('/').slice(1).join('/') : model.id
+  const fit = evaluateModelFit(model, macSpecs, readmeSnippet, t)
 
   return (
-    <div className="rounded border border-border hover:border-primary/30 transition-colors">
+    <div
+      className={`rounded border transition-colors ${
+        fit.status === 'too_big'
+          ? 'border-rose-500/35 bg-rose-500/[0.03] hover:border-rose-500/60'
+          : fit.status === 'runs_well'
+          ? 'border-border hover:border-primary/40'
+          : 'border-border hover:border-border'
+      }`}
+    >
       <div className="p-3">
         <div className="flex items-start justify-between gap-2">
           <div className="flex-1 min-w-0">
-            <div className="font-medium text-sm truncate" title={model.id}>
-              {shortName}
+            <div className="flex items-center gap-2 flex-wrap">
+              <span className="font-medium text-sm truncate" title={model.id}>
+                {shortName}
+              </span>
+
+              {/* Memory Fit Badge */}
+              {fit.status !== 'unknown' && (
+                <span
+                  className={`inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-semibold border ${
+                    fit.status === 'too_big'
+                      ? 'bg-rose-500/20 text-rose-300 border-rose-500/40'
+                      : fit.status === 'runs_well'
+                      ? 'bg-emerald-500/20 text-emerald-300 border-emerald-500/40'
+                      : 'bg-amber-500/20 text-amber-300 border-amber-500/40'
+                  }`}
+                  title={fit.detailMessage}
+                >
+                  {fit.badgeLabel}
+                </span>
+              )}
             </div>
-            <div className="text-xs text-muted-foreground">{model.author}</div>
+
+            <div className="text-xs text-muted-foreground mt-0.5">{model.author}</div>
             <div className="flex items-center gap-3 mt-1 text-xs text-muted-foreground">
               {model.size && <span title={t('sessions.download.modelSizeTitle')} className="font-semibold text-foreground">{model.size}</span>}
               <span title={t('sessions.download.sortDownloads')}>{t('sessions.download.downloadsLabel', { n: formatNumber(model.downloads) })}</span>
@@ -764,9 +1005,14 @@ function ModelCard({ model, isDownloading, isDownloaded, onDownload, dateField }
                 }) : timeAgo(model.lastModified, t)}
               </span>}
             </div>
+
+            {/* Note / Memory guidance */}
             {model.note && (
-              <p className="text-[10px] text-muted-foreground mt-1 line-clamp-2 whitespace-pre-line">{model.note}</p>
+              <p className={`text-[10px] mt-1 line-clamp-2 whitespace-pre-line ${fit.status === 'too_big' ? 'text-rose-300/90 font-medium' : 'text-muted-foreground'}`}>
+                {model.note}
+              </p>
             )}
+
             {model.tags.length > 0 && (
               <div className="flex flex-wrap gap-1 mt-1.5">
                 {model.tags.slice(0, 5).map(tag => (
@@ -794,11 +1040,27 @@ function ModelCard({ model, isDownloading, isDownloaded, onDownload, dateField }
               </span>
             ) : (
               <button
-                onClick={(e) => { e.stopPropagation(); onDownload() }}
+                onClick={(e) => {
+                  e.stopPropagation()
+                  if (fit.status === 'too_big') {
+                    onConfirmTooBig(model.id, fit)
+                  } else {
+                    onDownload()
+                  }
+                }}
                 disabled={isDownloading}
-                className="px-3 py-1.5 text-xs bg-primary text-primary-foreground rounded hover:bg-primary/90 disabled:opacity-40 whitespace-nowrap"
+                className={`px-3 py-1.5 text-xs rounded whitespace-nowrap transition-colors ${
+                  fit.status === 'too_big'
+                    ? 'bg-rose-500/15 border border-rose-500/40 text-rose-300 hover:bg-rose-500/25'
+                    : 'bg-primary text-primary-foreground hover:bg-primary/90'
+                } disabled:opacity-40`}
+                title={fit.status === 'too_big' ? fit.detailMessage : undefined}
               >
-                {isDownloading ? t('sessions.download.downloading') : t('sessions.create.download')}
+                {isDownloading
+                  ? t('sessions.download.downloading')
+                  : fit.status === 'too_big'
+                  ? '✕ 실행 불가'
+                  : t('sessions.create.download')}
               </button>
             )}
           </div>

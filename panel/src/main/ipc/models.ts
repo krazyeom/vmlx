@@ -43,6 +43,8 @@ import {
 } from "../../shared/remoteModelCapabilities";
 import { attachChildProcessStreamErrorGuard } from '../childProcessStreamGuards'
 import { isMfluxImageCandidate, mfluxImageSearchParams, verifyMfluxComponentExport } from '../../shared/mfluxImageDiscovery'
+import { getMacHardwareSpecs } from '../macSpecs'
+import { KNOWN_MODEL_MEMORY_REQUIREMENTS } from '../../shared/modelMemoryFit'
 
 /**
  * ms#75: resolve the HuggingFace-compatible base URL for API calls
@@ -2210,7 +2212,22 @@ export function registerModelHandlers(): void {
       tags: m.tags || [],
       pipelineTag: m.pipeline_tag,
       size: extractModelSize(m),
+      note: extractModelNote(m),
     };
+  }
+
+  function extractModelNote(m: any): string | undefined {
+    const modelId = (m.modelId || m.id || "").toLowerCase();
+    const cleanId = modelId.replace(/^[^/]+\//, "");
+    for (const [key, known] of Object.entries(KNOWN_MODEL_MEMORY_REQUIREMENTS)) {
+      if (cleanId.includes(key)) {
+        return known.note;
+      }
+    }
+    if (typeof m.description === "string" && m.description.trim()) {
+      return m.description.trim();
+    }
+    return undefined;
   }
 
   /** Extract total model size from HF API safetensors metadata.
@@ -2254,6 +2271,11 @@ export function registerModelHandlers(): void {
     } catch (_) {}
     return undefined;
   }
+
+  // Get Mac hardware specs for memory fit evaluation (mlx.app criteria)
+  ipcMain.handle("models:getMacSpecs", async () => {
+    return getMacHardwareSpecs();
+  });
 
   ipcMain.handle(
     "models:searchHF",
