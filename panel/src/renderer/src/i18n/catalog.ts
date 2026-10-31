@@ -1,7 +1,7 @@
 export type Locale =
+  | 'ko'
   | 'en'
   | 'zh'
-  | 'ko'
   | 'ja'
   | 'es'
   | 'fr'
@@ -12,9 +12,9 @@ export type Locale =
   | 'vi'
 
 export const LOCALES: readonly Locale[] = [
+  'ko',
   'en',
   'zh',
-  'ko',
   'ja',
   'es',
   'fr',
@@ -26,9 +26,9 @@ export const LOCALES: readonly Locale[] = [
 ]
 
 export const LOCALE_NAMES: Record<Locale, string> = {
+  ko: '한국어',
   en: 'English',
   zh: '中文',
-  ko: '한국어',
   ja: '日本語',
   es: 'Español',
   fr: 'Français',
@@ -40,9 +40,9 @@ export const LOCALE_NAMES: Record<Locale, string> = {
 }
 
 export const LOCALE_FLAGS: Record<Locale, string> = {
+  ko: '🇰🇷',
   en: '🇺🇸',
   zh: '🇨🇳',
-  ko: '🇰🇷',
   ja: '🇯🇵',
   es: '🇪🇸',
   fr: '🇫🇷',

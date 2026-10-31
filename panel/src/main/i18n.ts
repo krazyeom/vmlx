@@ -35,9 +35,9 @@ import it from '../renderer/src/i18n/locales/it.json'
 import vi from '../renderer/src/i18n/locales/vi.json'
 
 export type Locale =
+  | 'ko'
   | 'en'
   | 'zh'
-  | 'ko'
   | 'ja'
   | 'es'
   | 'fr'
@@ -47,9 +47,9 @@ export type Locale =
   | 'it'
   | 'vi'
 export const SUPPORTED_LOCALES: Locale[] = [
+  'ko',
   'en',
   'zh',
-  'ko',
   'ja',
   'es',
   'fr',
