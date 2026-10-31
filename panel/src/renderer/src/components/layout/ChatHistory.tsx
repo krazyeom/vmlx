@@ -166,20 +166,22 @@ export function ChatHistory({ currentChatId, onChatSelect, searchQuery }: ChatHi
     <div className="flex-1 overflow-y-auto">
       {/* vmlx#70: bulk-delete header — shown when there's at least one chat */}
       {chats.length > 0 && !searchQuery && (
-        <div className="px-3 pt-2 pb-1 flex items-center justify-between border-b border-border/40">
-          <span className="text-[10px] text-muted-foreground/70">
+        <div className="px-3 pt-2 pb-1.5 border-b border-border/40 flex flex-col gap-1">
+          <span className="text-[10px] text-muted-foreground/70 leading-normal">
             {t('layout.chatHistory.chatCountHint', { n: chats.length })}
           </span>
-          <button
-            type="button"
-            onClick={handleClearAll}
-            className="text-[10px] text-destructive hover:text-destructive/80 hover:underline flex items-center gap-1"
-            aria-label={t('layout.chatHistory.clearAllAria')}
-            title={t('layout.chatHistory.clearAllTitle')}
-          >
-            <Trash className="h-3 w-3" />
-            {t('layout.chatHistory.clearAll')}
-          </button>
+          <div className="flex items-center justify-end">
+            <button
+              type="button"
+              onClick={handleClearAll}
+              className="text-[10px] text-destructive hover:text-destructive/80 hover:underline flex items-center gap-1 shrink-0 whitespace-nowrap"
+              aria-label={t('layout.chatHistory.clearAllAria')}
+              title={t('layout.chatHistory.clearAllTitle')}
+            >
+              <Trash className="h-3 w-3 shrink-0" />
+              {t('layout.chatHistory.clearAll')}
+            </button>
+          </div>
         </div>
       )}
       {groups.map(group => (
