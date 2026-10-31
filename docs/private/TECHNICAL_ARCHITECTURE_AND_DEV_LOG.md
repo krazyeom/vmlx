@@ -130,8 +130,8 @@ flowchart TB
   - 사용자가 다운로드 버튼을 누르기 전에 **"내 Mac의 통합 메모리와 GPU 가용 한도 내에서 이 모델이 안전하게 구동되는지"** 미리 직관적으로 판별할 수 있는 장치가 필요함.
 - **아키텍처 및 구현 상세**:
   1. **하드웨어 사양 실시간 감지 ([macSpecs.ts](file:///Users/krazyeom/dev/vmlx/panel/src/main/macSpecs.ts))**:
-     - `system_profiler SPHardwareDataType` 및 OS 호출을 통해 Apple Silicon 칩셋 정보(`chipFamily`, `chipTier`)와 전체 UMA RAM 크기(`totalRamGb`)를 쿼리.
-     - macOS 기본 GPU 메모리 한도(`gpuDefaultLimitGb` ~75%) 및 유선 메모리 실가용치(`gpuMaxLimitGb` ~90%) 산출.
+     - `system_profiler SPHardwareDataType` 및 OS 호출을 통해 Apple Silicon 칩셋 정보(`chipFamily`, `chipTier`)와 전체 UMA RAM 크기(`totalRamGb`)를 쿼리 (기준 개발/검증 환경: **Apple M5 Pro 16-inch · 64 GB Unified Memory**).
+     - macOS 기본 GPU 메모리 한도(`gpuDefaultLimitGb` ~75%, 64GB 머신 기준 약 48GB) 및 유선 메모리 실가용치(`gpuMaxLimitGb` ~90%, 약 57.6GB) 산출.
   2. **메모리 적합도 평가 엔진 ([modelMemoryFit.ts](file:///Users/krazyeom/dev/vmlx/panel/src/shared/modelMemoryFit.ts))**:
      - 모델 가중치 크기, KV 캐시 컨텍스트 헤드룸, 큐레이션된 서빙 풋프린트(`KNOWN_MODEL_MEMORY_REQUIREMENTS`)를 기반으로 4단계 진단 상태 산출:
        - `runs_well` (초록색 뱃지): 기본 GPU 한도 내에서 쾌적하게 구동 (`✓ 추천 (N GB · 쾌적)`)
