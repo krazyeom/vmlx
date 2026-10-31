@@ -1,9 +1,12 @@
 const { spawnSync } = require('node:child_process')
 const {
   chmodSync,
+  closeSync,
   existsSync,
   lstatSync,
+  openSync,
   readFileSync,
+  readSync,
   readdirSync,
   renameSync,
   rmSync,
@@ -24,16 +27,23 @@ function walk(dir, out = []) {
 }
 
 function isMachO(path) {
-  // Fast path: Mach-O binaries in Python environments are .so, .dylib, or extensionless executables
-  if (!path.endsWith('.so') && !path.endsWith('.dylib')) {
-    const base = basename(path)
-    if (base.includes('.')) return false
+  try {
+    const fd = openSync(path, 'r')
+    const buf = Buffer.alloc(4)
+    readSync(fd, buf, 0, 4, 0)
+    closeSync(fd)
+    const magic = buf.readUInt32BE(0)
+    return (
+      magic === 0xfeedface ||
+      magic === 0xfeedfacf ||
+      magic === 0xcefaedfe ||
+      magic === 0xcffaedfe ||
+      magic === 0xcafebabe ||
+      magic === 0xbebafeca
+    )
+  } catch {
+    return false
   }
-  const proc = spawnSync('file', ['-b', path], {
-    stdio: 'pipe',
-    encoding: 'utf8',
-  })
-  return proc.status === 0 && (proc.stdout || '').includes('Mach-O')
 }
 
 function removeSignature(path) {

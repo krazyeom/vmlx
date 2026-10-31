@@ -289,6 +289,18 @@ export function estimateBitsFromId(repoId: string): number {
  * - Maximum wired memory limit is ~90%
  * - Context & runtime buffer: weights + max(1.5 GB, weights * 8%)
  */
+function resolveI18n(
+  t: ((key: string, params?: Record<string, string | number>) => string) | undefined,
+  key: string,
+  params: Record<string, string | number> | undefined,
+  fallback: string
+): string {
+  if (!t) return fallback;
+  const res = t(key, params);
+  if (!res || res === key) return fallback;
+  return res;
+}
+
 export function evaluateModelFit(
   model: {
     id: string;
@@ -300,12 +312,10 @@ export function evaluateModelFit(
   readmeText?: string | null,
   t?: (key: string, params?: Record<string, string | number>) => string
 ): ModelFitEvaluation {
-  const tr = t || ((k: string) => k);
-
   if (!macSpecs || macSpecs.totalRamGb <= 0) {
     return {
       status: 'unknown',
-      badgeLabel: tr('sessions.download.fit.unknown', undefined) || '확인 필요',
+      badgeLabel: resolveI18n(t, 'sessions.download.fit.unknown', undefined, '확인 필요'),
       badgeColor: 'muted',
       detailMessage: 'Mac 하드웨어 사양을 감지하는 중입니다.',
     };
@@ -337,21 +347,21 @@ export function evaluateModelFit(
     if (totalRamGb >= reqMac) {
       return {
         status: 'runs_well',
-        badgeLabel: `✓ 추천 (${reqMac} GB Mac 권장)`,
+        badgeLabel: resolveI18n(t, 'sessions.download.fit.badgeRunsWellExplicit', { mac: reqMac }, `✓ 추천 (${reqMac} GB Mac 권장)`),
         badgeColor: 'emerald',
         requiredMacGb: reqMac,
         servingFootprintGb: footprint,
-        detailMessage: `현재 Mac(${totalRamGb} GB)은 이 모델의 권장 사양(${reqMac} GB Mac)을 충족하여 쾌적하게 실행할 수 있습니다.`,
+        detailMessage: resolveI18n(t, 'sessions.download.fit.detailRunsWellExplicit', { current: totalRamGb, req: reqMac }, `현재 Mac(${totalRamGb} GB)은 이 모델의 권장 사양(${reqMac} GB Mac)을 충족하여 쾌적하게 실행할 수 있습니다.`),
         mlxAppUrl: `https://mlx.app/ko/mac`,
       };
     } else {
       return {
         status: 'too_big',
-        badgeLabel: `✕ 실행 불가 (${reqMac} GB Mac 필요)`,
+        badgeLabel: resolveI18n(t, 'sessions.download.fit.badgeTooBigExplicit', { mac: reqMac }, `✕ 실행 불가 (${reqMac} GB Mac 필요)`),
         badgeColor: 'rose',
         requiredMacGb: reqMac,
         servingFootprintGb: footprint,
-        detailMessage: `이 모델은 최소 ${reqMac} GB Mac(권장 풋프린트: ~${footprint || Math.round(reqMac * 0.8)} GB)이 필요합니다. 현재 Mac(${totalRamGb} GB)에서는 다운로드해도 메모리 부족(OOM)으로 실행되지 않습니다.`,
+        detailMessage: resolveI18n(t, 'sessions.download.fit.detailTooBigExplicit', { current: totalRamGb, req: reqMac, footprint: footprint || Math.round(reqMac * 0.8) }, `이 모델은 최소 ${reqMac} GB Mac(권장 풋프린트: ~${footprint || Math.round(reqMac * 0.8)} GB)이 필요합니다. 현재 Mac(${totalRamGb} GB)에서는 다운로드해도 메모리 부족(OOM)으로 실행되지 않습니다.`),
         mlxAppUrl: `https://mlx.app/ko/mac`,
       };
     }
@@ -363,31 +373,31 @@ export function evaluateModelFit(
     if (footprint <= gpuDefaultLimitGb) {
       return {
         status: 'runs_well',
-        badgeLabel: `✓ 추천 (~${footprint.toFixed(0)} GB · 쾌적)`,
+        badgeLabel: resolveI18n(t, 'sessions.download.fit.badgeRunsWellFootprint', { footprint: footprint.toFixed(0) }, `✓ 추천 (~${footprint.toFixed(0)} GB · 쾌적)`),
         badgeColor: 'emerald',
         servingFootprintGb: footprint,
         estimatedNeedsGb: footprint,
-        detailMessage: `서빙 메모리 약 ${footprint.toFixed(0)} GB로 현재 Mac(기본 GPU 한도: ${gpuDefaultLimitGb} GB)에서 여유롭게 실행됩니다.`,
+        detailMessage: resolveI18n(t, 'sessions.download.fit.detailRunsWellFootprint', { footprint: footprint.toFixed(0), gpuLimit: gpuDefaultLimitGb }, `서빙 메모리 약 ${footprint.toFixed(0)} GB로 현재 Mac(기본 GPU 한도: ${gpuDefaultLimitGb} GB)에서 여유롭게 실행됩니다.`),
         mlxAppUrl: `https://mlx.app/ko/mac`,
       };
     } else if (footprint <= gpuMaxLimitGb) {
       return {
         status: 'tight',
-        badgeLabel: `⚠ 주의 (~${footprint.toFixed(0)} GB · 겨우 들어감)`,
+        badgeLabel: resolveI18n(t, 'sessions.download.fit.badgeTightFootprint', { footprint: footprint.toFixed(0) }, `⚠ 주의 (~${footprint.toFixed(0)} GB · 겨우 들어감)`),
         badgeColor: 'amber',
         servingFootprintGb: footprint,
         estimatedNeedsGb: footprint,
-        detailMessage: `서빙 메모리 약 ${footprint.toFixed(0)} GB로 현재 Mac(${totalRamGb} GB)의 메모리 경계에 가깝습니다. GPU 메모리 한도를 높이고 컨텍스트를 짧게 유지하세요.`,
+        detailMessage: resolveI18n(t, 'sessions.download.fit.detailTightFootprint', { footprint: footprint.toFixed(0), current: totalRamGb }, `서빙 메모리 약 ${footprint.toFixed(0)} GB로 현재 Mac(${totalRamGb} GB)의 메모리 경계에 가깝습니다. GPU 메모리 한도를 높이고 컨텍스트를 짧게 유지하세요.`),
         mlxAppUrl: `https://mlx.app/ko/mac`,
       };
     } else {
       return {
         status: 'too_big',
-        badgeLabel: `✕ 실행 불가 (~${footprint.toFixed(0)} GB 필요)`,
+        badgeLabel: resolveI18n(t, 'sessions.download.fit.badgeTooBigFootprint', { footprint: footprint.toFixed(0) }, `✕ 실행 불가 (~${footprint.toFixed(0)} GB 필요)`),
         badgeColor: 'rose',
         servingFootprintGb: footprint,
         estimatedNeedsGb: footprint,
-        detailMessage: `서빙 메모리 약 ${footprint.toFixed(0)} GB가 필요하여 현재 Mac(${totalRamGb} GB)의 최대 가용량을 초과합니다. 다운로드해도 실행되지 않습니다.`,
+        detailMessage: resolveI18n(t, 'sessions.download.fit.detailTooBigFootprint', { footprint: footprint.toFixed(0), current: totalRamGb }, `서빙 메모리 약 ${footprint.toFixed(0)} GB가 필요하여 현재 Mac(${totalRamGb} GB)의 최대 가용량을 초과합니다. 다운로드해도 실행되지 않습니다.`),
         mlxAppUrl: `https://mlx.app/ko/mac`,
       };
     }
@@ -414,28 +424,39 @@ export function evaluateModelFit(
     if (needsGb <= gpuDefaultLimitGb) {
       return {
         status: 'runs_well',
-        badgeLabel: `✓ 추천 (${needsGb} GB · 쾌적)`,
+        badgeLabel: resolveI18n(t, 'sessions.download.fit.badgeRunsWellCalc', { needs: needsGb }, `✓ 추천 (${needsGb} GB · 쾌적)`),
         badgeColor: 'emerald',
         estimatedNeedsGb: needsGb,
-        detailMessage: `필요 메모리 약 ${needsGb} GB (가중치 ${estimatedWeightsGb.toFixed(1)} GB + 컨텍스트). 현재 Mac(${totalRamGb} GB, GPU 한도 ${gpuDefaultLimitGb} GB)에서 쾌적하게 실행됩니다.`,
+        detailMessage: resolveI18n(t, 'sessions.download.fit.detailRunsWellCalc', {
+          needs: needsGb,
+          weights: estimatedWeightsGb.toFixed(1),
+          current: totalRamGb,
+          gpuLimit: gpuDefaultLimitGb,
+        }, `필요 메모리 약 ${needsGb} GB (가중치 ${estimatedWeightsGb.toFixed(1)} GB + 컨텍스트). 현재 Mac(${totalRamGb} GB, GPU 한도 ${gpuDefaultLimitGb} GB)에서 쾌적하게 실행됩니다.`),
         mlxAppUrl: `https://mlx.app/ko/mac`,
       };
     } else if (needsGb <= gpuMaxLimitGb) {
       return {
         status: 'tight',
-        badgeLabel: `⚠ 주의 (${needsGb} GB · 겨우 들어감)`,
+        badgeLabel: resolveI18n(t, 'sessions.download.fit.badgeTightCalc', { needs: needsGb }, `⚠ 주의 (${needsGb} GB · 겨우 들어감)`),
         badgeColor: 'amber',
         estimatedNeedsGb: needsGb,
-        detailMessage: `필요 메모리 약 ${needsGb} GB. 현재 Mac(${totalRamGb} GB)의 메모리를 거의 다 씁니다. GPU 메모리 한도를 올리고 컨텍스트를 짧게 유지하세요.`,
+        detailMessage: resolveI18n(t, 'sessions.download.fit.detailTightCalc', {
+          needs: needsGb,
+          current: totalRamGb,
+        }, `필요 메모리 약 ${needsGb} GB. 현재 Mac(${totalRamGb} GB)의 메모리를 거의 다 씁니다. GPU 메모리 한도를 올리고 컨텍스트를 짧게 유지하세요.`),
         mlxAppUrl: `https://mlx.app/ko/mac`,
       };
     } else {
       return {
         status: 'too_big',
-        badgeLabel: `✕ 실행 불가 (${needsGb} GB 필요)`,
+        badgeLabel: resolveI18n(t, 'sessions.download.fit.badgeTooBigCalc', { needs: needsGb }, `✕ 실행 불가 (${needsGb} GB 필요)`),
         badgeColor: 'rose',
         estimatedNeedsGb: needsGb,
-        detailMessage: `필요 메모리 약 ${needsGb} GB로 현재 Mac(${totalRamGb} GB)의 가용량을 초과합니다. 다운로드해도 실행되지 않습니다.`,
+        detailMessage: resolveI18n(t, 'sessions.download.fit.detailTooBigCalc', {
+          needs: needsGb,
+          current: totalRamGb,
+        }, `필요 메모리 약 ${needsGb} GB로 현재 Mac(${totalRamGb} GB)의 가용량을 초과합니다. 다운로드해도 실행되지 않습니다.`),
         mlxAppUrl: `https://mlx.app/ko/mac`,
       };
     }
@@ -444,9 +465,9 @@ export function evaluateModelFit(
   // 4. Default / Unknown
   return {
     status: 'unknown',
-    badgeLabel: '메모리 미확인',
+    badgeLabel: resolveI18n(t, 'sessions.download.fit.badgeUnknown', undefined, '메모리 미확인'),
     badgeColor: 'muted',
-    detailMessage: '정확한 모델 가중치 크기를 확인할 수 없습니다.',
+    detailMessage: resolveI18n(t, 'sessions.download.fit.detailUnknown', undefined, '정확한 모델 가중치 크기를 확인할 수 없습니다.'),
   };
 }
 

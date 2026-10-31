@@ -1753,6 +1753,7 @@ export function registerModelHandlers(): void {
     job.process = proc;
 
     let stdout = "";
+    let stderr = "";
     let lastProgress: Partial<DownloadProgress> = {};
     let stdoutBuffer = "";
 
@@ -1884,9 +1885,10 @@ export function registerModelHandlers(): void {
 
     // Capture stderr for error reporting but don't parse tqdm
     proc.stderr?.on("data", (data: Buffer) => {
-      // Log stderr but don't parse — our progress comes from structured stdout
-      const chunk = data.toString().trim();
-      if (chunk) console.log(`[DOWNLOADS] stderr: ${chunk.slice(0, 200)}`);
+      const chunk = data.toString();
+      stderr += chunk;
+      const trimmed = chunk.trim();
+      if (trimmed) console.log(`[DOWNLOADS] stderr: ${trimmed.slice(0, 200)}`);
     });
     attachChildProcessStreamErrorGuard(proc.stdout, (err) => {
       console.warn(`[DOWNLOADS] stdout stream error: ${err.message}`);
@@ -1895,9 +1897,9 @@ export function registerModelHandlers(): void {
       console.warn(`[DOWNLOADS] stderr stream error: ${err.message}`);
     });
 
-    proc.on("close", async (code: number | null) => {
+    proc.on("close", async (code: number | null, signal?: NodeJS.Signals | null) => {
       console.log(
-        `[DOWNLOADS] Process exited: ${job.repoId} code=${code} cancelled=${job.wasCancelled}`,
+        `[DOWNLOADS] Process exited: ${job.repoId} code=${code} signal=${signal} cancelled=${job.wasCancelled}`,
       );
 
       if (job.wasPaused) {
@@ -1972,7 +1974,9 @@ export function registerModelHandlers(): void {
           path: job.modelDir,
         });
       } else {
-        let errorMsg = `Download failed (exit ${code})`;
+        let errorMsg = code !== null
+          ? `Download failed (exit ${code})`
+          : `Download process terminated${signal ? ` (${signal})` : ""}`;
         try {
           const lines = stdout.trim().split("\n").filter(Boolean);
           if (lines.length > 0) {
@@ -1998,6 +2002,15 @@ export function registerModelHandlers(): void {
             errorMsg = result.error || errorMsg;
           }
         } catch {}
+        if (errorMsg.startsWith("Download failed") || errorMsg.startsWith("Download process terminated")) {
+          const cleanStderr = stderr.trim();
+          if (cleanStderr) {
+            const lastLine = cleanStderr.split("\n").filter(Boolean).slice(-1)[0] || "";
+            if (lastLine) {
+              errorMsg += `: ${lastLine}`;
+            }
+          }
+        }
         // stderr is logged to console but not parsed for progress anymore
         try {
           await unlink(markerFile);

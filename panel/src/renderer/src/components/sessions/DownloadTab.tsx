@@ -667,9 +667,24 @@ export function DownloadTab({ onDownloadComplete, initialModelType = 'text' }: D
         {/* Left: Model List */}
         <div className="w-1/2 flex flex-col min-w-0">
           {searchQuery.trim() ? (
-            <span className="text-xs text-muted-foreground uppercase tracking-wider mb-2">{t('sessions.download.searchResults')}</span>
+            <div className="flex items-center justify-between mb-2 gap-2 flex-wrap">
+              <span className="text-xs text-muted-foreground uppercase tracking-wider">{t('sessions.download.searchResults')}</span>
+              <div className="flex items-center gap-1">
+                <span className="text-[11px] text-muted-foreground whitespace-nowrap">{t('sessions.download.sortOrderLabel')}</span>
+                <select
+                  value={macMemorySortOrder}
+                  onChange={(e) => setMacMemorySortOrder(e.target.value as MacMemorySortOrder)}
+                  className="cfg-input text-xs w-auto font-medium"
+                  title={t('sessions.download.sortOrderTooltip')}
+                >
+                  <option value="compatibility">{t('sessions.download.sortOrderCompatibility')}</option>
+                  <option value="comfortable">{t('sessions.download.sortOrderComfortable')}</option>
+                  <option value="fullest_ram">{t('sessions.download.sortOrderFullestRam')}</option>
+                </select>
+              </div>
+            </div>
           ) : (
-            <div className="flex items-center gap-1 mb-2 flex-wrap">
+            <div className="flex items-center gap-1.5 mb-2 flex-wrap">
               {modelType === 'text' && <>
               <button
                 data-vmlx-action="feed-jang"
@@ -697,6 +712,19 @@ export function DownloadTab({ onDownloadComplete, initialModelType = 'text' }: D
                   disabled={isCollectionLoading} className="text-xs px-2 py-1 border border-border disabled:opacity-50">
                   {t('sessions.download.refreshFeed')}
                 </button>
+                <div className="flex items-center gap-1 ml-auto">
+                  <span className="text-[11px] text-muted-foreground whitespace-nowrap">{t('sessions.download.sortOrderLabel')}</span>
+                  <select
+                    value={macMemorySortOrder}
+                    onChange={(e) => setMacMemorySortOrder(e.target.value as MacMemorySortOrder)}
+                    className="cfg-input text-xs w-auto font-medium"
+                    title={t('sessions.download.sortOrderTooltip')}
+                  >
+                    <option value="compatibility">{t('sessions.download.sortOrderCompatibility')}</option>
+                    <option value="comfortable">{t('sessions.download.sortOrderComfortable')}</option>
+                    <option value="fullest_ram">{t('sessions.download.sortOrderFullestRam')}</option>
+                  </select>
+                </div>
                 <p className="w-full text-xs text-muted-foreground" data-vmlx-status="model-feed-source">
                   {t('sessions.download.authorFeedNote', { author: HF_MODEL_FEED_AUTHORS[collectionTab] })}
                 </p>
