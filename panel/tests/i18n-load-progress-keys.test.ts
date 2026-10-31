@@ -18,7 +18,19 @@ import { describe, expect, it } from 'vitest'
  * namespace or rename drift between the emitter and the catalogs.
  */
 
-const LOCALES = ['en', 'es', 'ja', 'ko', 'zh'] as const
+const LOCALES = [
+  'en',
+  'es',
+  'ja',
+  'ko',
+  'zh',
+  'fr',
+  'de',
+  'ru',
+  'pt',
+  'it',
+  'vi',
+] as const
 const ROOT = join(__dirname, '..')
 
 function loadCatalog(locale: string): Record<string, unknown> {

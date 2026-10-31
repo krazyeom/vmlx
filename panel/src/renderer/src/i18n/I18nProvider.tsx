@@ -4,6 +4,12 @@ import zh from './locales/zh.json'
 import ko from './locales/ko.json'
 import ja from './locales/ja.json'
 import es from './locales/es.json'
+import fr from './locales/fr.json'
+import de from './locales/de.json'
+import ru from './locales/ru.json'
+import pt from './locales/pt.json'
+import it from './locales/it.json'
+import vi from './locales/vi.json'
 import type { Locale } from './catalog'
 import { I18nContext } from './context'
 import { translateFromCatalog } from './translate'
@@ -14,6 +20,12 @@ const locales: Record<Locale, Record<string, unknown>> = {
   ko,
   ja,
   es,
+  fr,
+  de,
+  ru,
+  pt,
+  it,
+  vi,
 }
 
 // localStorage key — namespaced under the vMLX prefix to not collide with

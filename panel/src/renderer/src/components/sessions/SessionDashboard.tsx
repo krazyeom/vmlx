@@ -282,7 +282,7 @@ export function SessionDashboard({ onOpenSession, onConfigureSession, onCreateSe
             <Cpu className="h-7 w-7 text-primary" />
           </div>
           <h2 className="text-xl font-semibold mb-2">{t('sessions.dashboard.emptyHeader')}</h2>
-          <p className="text-sm text-muted-foreground text-center mb-6 max-w-sm">
+          <p className="text-sm text-muted-foreground text-center mb-6 max-w-xl">
             {t('sessions.dashboard.emptyBody')}
           </p>
           <div className="flex gap-3">

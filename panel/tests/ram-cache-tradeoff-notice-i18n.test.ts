@@ -4,6 +4,12 @@ import es from '../src/renderer/src/i18n/locales/es.json'
 import ja from '../src/renderer/src/i18n/locales/ja.json'
 import ko from '../src/renderer/src/i18n/locales/ko.json'
 import zh from '../src/renderer/src/i18n/locales/zh.json'
+import fr from '../src/renderer/src/i18n/locales/fr.json'
+import de from '../src/renderer/src/i18n/locales/de.json'
+import ru from '../src/renderer/src/i18n/locales/ru.json'
+import pt from '../src/renderer/src/i18n/locales/pt.json'
+import itLocale from '../src/renderer/src/i18n/locales/it.json'
+import vi from '../src/renderer/src/i18n/locales/vi.json'
 
 /**
  * Every user sees this notice at the top of Session Settings, in their own
@@ -15,7 +21,19 @@ import zh from '../src/renderer/src/i18n/locales/zh.json'
  * missing translation silently falls back to English, and this is exactly
  * the audience that would be left behind.
  */
-const LOCALES: Record<string, any> = { en, es, ja, ko, zh }
+const LOCALES: Record<string, any> = {
+  en,
+  es,
+  ja,
+  ko,
+  zh,
+  fr,
+  de,
+  ru,
+  pt,
+  it: itLocale,
+  vi,
+}
 
 describe('RAM cache trade-off notice', () => {
   it.each(Object.keys(LOCALES))('%s has the notice', (name) => {

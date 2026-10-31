@@ -392,7 +392,7 @@ function ChatEmptyState({ onNewChat }: { onNewChat: () => void }) {
         <MessageSquare className="h-8 w-8 text-primary" />
       </div>
       <h2 className="text-lg font-semibold mb-2">{t('chat.interface.emptyStateTitle')}</h2>
-      <p className="text-sm text-muted-foreground mb-4 max-w-md">
+      <p className="text-sm text-muted-foreground mb-4 max-w-xl">
         {t('chat.quickStart.emptyBody')}
       </p>
       <button
@@ -402,7 +402,7 @@ function ChatEmptyState({ onNewChat }: { onNewChat: () => void }) {
         {t('chat.interface.newChat')}
       </button>
 
-      <div className="text-left max-w-lg space-y-3 text-xs text-muted-foreground border-t border-border pt-4">
+      <div className="text-left w-full max-w-2xl space-y-3 text-xs text-muted-foreground border-t border-border pt-4">
         <p className="font-semibold text-foreground text-sm">{t('chat.quickStart.title')}</p>
 
         <div>

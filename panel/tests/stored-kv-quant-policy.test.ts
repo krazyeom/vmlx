@@ -8,7 +8,19 @@ import {
 } from "../src/shared/storedKvQuantPolicy"
 
 const FORM = "src/renderer/src/components/sessions/SessionConfigForm.tsx"
-const LOCALES = ["en", "ko", "ja", "zh", "es"]
+const LOCALES = [
+  "en",
+  "ko",
+  "ja",
+  "zh",
+  "es",
+  "fr",
+  "de",
+  "ru",
+  "pt",
+  "it",
+  "vi",
+]
 
 describe("mixed-SWA detection", () => {
   it("matches on cache subtype", () => {

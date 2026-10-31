@@ -27,13 +27,54 @@ import zh from '../renderer/src/i18n/locales/zh.json'
 import ko from '../renderer/src/i18n/locales/ko.json'
 import ja from '../renderer/src/i18n/locales/ja.json'
 import es from '../renderer/src/i18n/locales/es.json'
+import fr from '../renderer/src/i18n/locales/fr.json'
+import de from '../renderer/src/i18n/locales/de.json'
+import ru from '../renderer/src/i18n/locales/ru.json'
+import pt from '../renderer/src/i18n/locales/pt.json'
+import it from '../renderer/src/i18n/locales/it.json'
+import vi from '../renderer/src/i18n/locales/vi.json'
 
-export type Locale = 'en' | 'zh' | 'ko' | 'ja' | 'es'
-export const SUPPORTED_LOCALES: Locale[] = ['en', 'zh', 'ko', 'ja', 'es']
+export type Locale =
+  | 'en'
+  | 'zh'
+  | 'ko'
+  | 'ja'
+  | 'es'
+  | 'fr'
+  | 'de'
+  | 'ru'
+  | 'pt'
+  | 'it'
+  | 'vi'
+export const SUPPORTED_LOCALES: Locale[] = [
+  'en',
+  'zh',
+  'ko',
+  'ja',
+  'es',
+  'fr',
+  'de',
+  'ru',
+  'pt',
+  'it',
+  'vi',
+]
 
 type LocaleTree = Record<string, any>
 
-const locales: Record<Locale, LocaleTree> = { en, zh, ko, ja, es }
+const locales: Record<Locale, LocaleTree> = {
+  en,
+  zh,
+  ko,
+  ja,
+  es,
+  fr,
+  de,
+  ru,
+  pt,
+  it,
+  vi,
+}
 let currentLocale: Locale = 'en'
 
 function flattenTranslationKeys(tree: LocaleTree, prefix = ''): string[] {

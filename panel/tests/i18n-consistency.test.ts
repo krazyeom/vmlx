@@ -19,7 +19,19 @@ import { describe, it, expect } from 'vitest'
 import { existsSync, readFileSync } from 'fs'
 import { resolve } from 'path'
 
-const LOCALES = ['en', 'zh', 'ko', 'ja', 'es'] as const
+const LOCALES = [
+  'en',
+  'zh',
+  'ko',
+  'ja',
+  'es',
+  'fr',
+  'de',
+  'ru',
+  'pt',
+  'it',
+  'vi',
+] as const
 type LocaleKey = (typeof LOCALES)[number]
 const EXPECTED_MAX_THINKING_TOKENS_HELP: Record<LocaleKey, string> = {
   en: "Leave blank to preserve the model/runtime native default and the request's full output budget. Only an explicit value in this UI or API max_thinking_tokens sets a separate reasoning cap. Models without thinking-budget support may ignore it.",
@@ -27,6 +39,12 @@ const EXPECTED_MAX_THINKING_TOKENS_HELP: Record<LocaleKey, string> = {
   ko: '비워 두면 모델/런타임의 기본 동작과 요청의 전체 출력 예산이 유지됩니다. 이 UI에 명시적 값을 입력하거나 API에서 max_thinking_tokens를 설정한 경우에만 별도의 추론 한도가 적용됩니다. 사고 예산을 지원하지 않는 모델은 이를 무시할 수 있습니다.',
   ja: '空欄のままにすると、モデル/ランタイムのネイティブ既定値とリクエストの全出力予算が維持されます。この UI で明示的な値を入力するか、API で max_thinking_tokens を指定した場合にのみ、別個の推論上限が設定されます。思考予算に対応していないモデルでは無視される場合があります。',
   es: 'Déjelo vacío para conservar el valor nativo predeterminado del modelo/runtime y el presupuesto de salida completo de la solicitud. Solo un valor explícito en esta interfaz o max_thinking_tokens en la API establece un límite de razonamiento independiente. Los modelos que no admiten un presupuesto de pensamiento pueden ignorarlo.',
+  fr: "Laissez vide pour conserver la valeur par défaut native du modèle/runtime et le budget de sortie total de la requête. Seule une valeur explicite dans cette interface ou max_thinking_tokens dans l'API définit un plafond de raisonnement distinct. Les modèles sans prise en charge du budget de réflexion peuvent l'ignorer.",
+  de: 'Leer lassen, um den nativen Standardwert des Modells/der Laufzeit und das vollständige Ausgabebudget der Anfrage beizubehalten. Nur ein expliziter Wert in dieser Benutzeroberfläche oder max_thinking_tokens in der API legt eine separate Denkobergrenze fest. Modelle ohne Unterstützung für ein Denkbudget ignorieren dies möglicherweise.',
+  ru: 'Оставьте пустым, чтобы сохранить исходное значение по умолчанию для модели/среды выполнения и полный бюджет вывода запроса. Только явное значение в этом интерфейсе или max_thinking_tokens в API устанавливает отдельный лимит на рассуждения. Модели без поддержки бюджета на размышления могут игнорировать этот параметр.',
+  pt: 'Deixe em branco para preservar o padrão nativo do modelo/runtime e o orçamento total de saída da solicitação. Apenas um valor explícito nesta interface ou max_thinking_tokens na API define um limite de raciocínio separado. Modelos sem suporte a orçamento de pensamento podem ignorá-lo.',
+  it: "Lascia vuoto per mantenere l'impostazione predefinita nativa del modello/runtime e l'intero budget di output della richiesta. Solo un valor esplicito in questa interfaccia o max_thinking_tokens nell'API imposta un limite di ragionamento separato. I modelli senza supporto per il budget di pensiero potrebbero ignorarlo.",
+  vi: 'Để trống để giữ nguyên giá trị mặc định của mô hình/thời gian chạy và toàn bộ ngân sách đầu ra của yêu cầu. Chỉ giá trị rõ ràng trong giao diện này hoặc max_thinking_tokens trong API mới đặt giới hạn suy luận riêng. Các mô hình không hỗ trợ ngân sách suy nghĩ có thể bỏ qua tùy chọn này.',
 }
 const EXPECTED_TOP_P_HELP: Record<LocaleKey, string> = {
   en: 'Nucleus sampling. Keeps the smallest set of highest-probability tokens whose cumulative probability reaches this threshold.',
@@ -34,6 +52,12 @@ const EXPECTED_TOP_P_HELP: Record<LocaleKey, string> = {
   ko: '핵 샘플링. 누적 확률이 이 임계값에 도달할 때까지 확률이 높은 토큰의 최소 집합을 사용합니다.',
   ja: '核サンプリング。累積確率がこの閾値に達するまで、確率の高い順に最小限のトークン集合を使用します。',
   es: 'Muestreo por núcleo. Conserva el conjunto más pequeño de tokens de mayor probabilidad cuya probabilidad acumulada alcanza este umbral.',
+  fr: 'Échantillonnage de noyau. Conserve le plus petit ensemble de jetons de plus haute probabilité dont la probabilité cumulée atteint ce seuil.',
+  de: 'Nucleus-Sampling. Behält die kleinste Menge von Token mit der höchsten Wahrscheinlichkeit, deren kumulative Wahrscheinlichkeit diesen Schwellenwert erreicht.',
+  ru: 'Ядерное сэмплирование. Сохраняет наименьший набор токенов с наибольшей вероятностью, чья кумулятивная вероятность достигает этого порога.',
+  pt: 'Amostragem de núcleo. Mantém o menor conjunto de tokens de maior probabilidade cuja probabilidade cumulativa atinge esse limite.',
+  it: 'Campionamento nucleus. Mantiene il set più piccolo di token con la probabilità più alta la cui probabilità cumulativa raggiunge questa soglia.',
+  vi: 'Lấy mẫu nhân (Nucleus sampling). Giữ lại tập hợp nhỏ nhất gồm các token có xác suất cao nhất có tổng xác suất tích lũy đạt đến ngưỡng này.',
 }
 const LOCALE_DIR = resolve(
   __dirname,
