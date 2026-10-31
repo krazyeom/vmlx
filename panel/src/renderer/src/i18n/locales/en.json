@@ -1528,8 +1528,8 @@
       "filterCompatibleOnly": "Fits my Mac only",
       "sortOrderLabel": "Sort:",
       "sortOrderCompatibility": "Recommended",
-      "sortOrderComfortable": "Comfort First (Light & Fast)",
-      "sortOrderFullestRam": "Fullest Usable RAM (Max Model)",
+      "sortOrderComfortable": "Comfort First",
+      "sortOrderFullestRam": "Max RAM Fit",
       "sortOrderTooltip": "Sort models based on your Mac unified memory specifications",
       "fit": {
         "recommended": "Recommended",

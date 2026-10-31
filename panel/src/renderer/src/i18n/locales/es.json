@@ -1527,9 +1527,9 @@
       "macGuideLink": "Guía de recomendaciones mlx.app",
       "filterCompatibleOnly": "Solo compatibles con mi Mac",
       "sortOrderLabel": "Ordenar:",
-      "sortOrderCompatibility": "Recomendados primero",
-      "sortOrderComfortable": "Más fluidos (ligeros y rápidos)",
-      "sortOrderFullestRam": "Mayor uso de RAM (modelo máximo)",
+      "sortOrderCompatibility": "Recomendado",
+      "sortOrderComfortable": "Más fluido",
+      "sortOrderFullestRam": "Máxima RAM",
       "sortOrderTooltip": "Ordenar modelos según las especificaciones de memoria de tu Mac",
       "fit": {
         "recommended": "Recomendado",

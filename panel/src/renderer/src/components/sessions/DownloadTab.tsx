@@ -448,19 +448,16 @@ export function DownloadTab({ onDownloadComplete, initialModelType = 'text' }: D
             </span>
           </div>
           <div className="flex flex-wrap items-center gap-2 flex-shrink-0">
-            <div className="flex items-center gap-1.5">
-              <span className="text-muted-foreground whitespace-nowrap">{t('sessions.download.sortOrderLabel')}</span>
-              <select
-                value={macMemorySortOrder}
-                onChange={(e) => setMacMemorySortOrder(e.target.value as MacMemorySortOrder)}
-                className="px-2 py-1 bg-background border border-border rounded text-xs text-foreground cursor-pointer hover:border-primary/50 transition-colors"
-                title={t('sessions.download.sortOrderTooltip')}
-              >
-                <option value="compatibility">{t('sessions.download.sortOrderCompatibility')}</option>
-                <option value="comfortable">{t('sessions.download.sortOrderComfortable')}</option>
-                <option value="fullest_ram">{t('sessions.download.sortOrderFullestRam')}</option>
-              </select>
-            </div>
+            <select
+              value={macMemorySortOrder}
+              onChange={(e) => setMacMemorySortOrder(e.target.value as MacMemorySortOrder)}
+              className="px-2 py-1 bg-background border border-border rounded text-xs text-foreground cursor-pointer hover:border-primary/50 transition-colors"
+              title={t('sessions.download.sortOrderTooltip')}
+            >
+              <option value="compatibility">{t('sessions.download.sortOrderCompatibility')}</option>
+              <option value="comfortable">{t('sessions.download.sortOrderComfortable')}</option>
+              <option value="fullest_ram">{t('sessions.download.sortOrderFullestRam')}</option>
+            </select>
             <button
               type="button"
               onClick={() => setFilterCompatibleOnly(prev => !prev)}
@@ -669,19 +666,16 @@ export function DownloadTab({ onDownloadComplete, initialModelType = 'text' }: D
           {searchQuery.trim() ? (
             <div className="flex items-center justify-between mb-2 gap-2 flex-wrap">
               <span className="text-xs text-muted-foreground uppercase tracking-wider">{t('sessions.download.searchResults')}</span>
-              <div className="flex items-center gap-1">
-                <span className="text-[11px] text-muted-foreground whitespace-nowrap">{t('sessions.download.sortOrderLabel')}</span>
-                <select
-                  value={macMemorySortOrder}
-                  onChange={(e) => setMacMemorySortOrder(e.target.value as MacMemorySortOrder)}
-                  className="cfg-input text-xs w-auto font-medium"
-                  title={t('sessions.download.sortOrderTooltip')}
-                >
-                  <option value="compatibility">{t('sessions.download.sortOrderCompatibility')}</option>
-                  <option value="comfortable">{t('sessions.download.sortOrderComfortable')}</option>
-                  <option value="fullest_ram">{t('sessions.download.sortOrderFullestRam')}</option>
-                </select>
-              </div>
+              <select
+                value={macMemorySortOrder}
+                onChange={(e) => setMacMemorySortOrder(e.target.value as MacMemorySortOrder)}
+                className="cfg-input text-xs w-auto font-medium"
+                title={t('sessions.download.sortOrderTooltip')}
+              >
+                <option value="compatibility">{t('sessions.download.sortOrderCompatibility')}</option>
+                <option value="comfortable">{t('sessions.download.sortOrderComfortable')}</option>
+                <option value="fullest_ram">{t('sessions.download.sortOrderFullestRam')}</option>
+              </select>
             </div>
           ) : (
             <div className="flex items-center gap-1.5 mb-2 flex-wrap">
@@ -712,8 +706,7 @@ export function DownloadTab({ onDownloadComplete, initialModelType = 'text' }: D
                   disabled={isCollectionLoading} className="text-xs px-2 py-1 border border-border disabled:opacity-50">
                   {t('sessions.download.refreshFeed')}
                 </button>
-                <div className="flex items-center gap-1 ml-auto">
-                  <span className="text-[11px] text-muted-foreground whitespace-nowrap">{t('sessions.download.sortOrderLabel')}</span>
+                <div className="ml-auto">
                   <select
                     value={macMemorySortOrder}
                     onChange={(e) => setMacMemorySortOrder(e.target.value as MacMemorySortOrder)}

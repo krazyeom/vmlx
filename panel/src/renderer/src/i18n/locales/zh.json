@@ -1527,9 +1527,9 @@
       "macGuideLink": "mlx.app 推荐指南",
       "filterCompatibleOnly": "仅显示适配我的 Mac 模型",
       "sortOrderLabel": "排序:",
-      "sortOrderCompatibility": "默认推荐顺序",
-      "sortOrderComfortable": "流畅优先 (轻量迅速)",
-      "sortOrderFullestRam": "内存充分利用优先 (最大性能)",
+      "sortOrderCompatibility": "推荐优先",
+      "sortOrderComfortable": "流畅优先",
+      "sortOrderFullestRam": "高占用优先",
       "sortOrderTooltip": "根据当前 Mac 硬件配置排序模型",
       "fit": {
         "recommended": "推荐",

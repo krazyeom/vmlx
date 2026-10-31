@@ -1527,9 +1527,9 @@
       "macGuideLink": "mlx.app 推奨ガイド",
       "filterCompatibleOnly": "お使いの Mac に適合するモデルのみ",
       "sortOrderLabel": "並び替え:",
-      "sortOrderCompatibility": "基本推奨順",
-      "sortOrderComfortable": "快適順 (軽量・高速)",
-      "sortOrderFullestRam": "使用可能 RAM 最大活用順 (最大モデル)",
+      "sortOrderCompatibility": "推奨順",
+      "sortOrderComfortable": "快適順",
+      "sortOrderFullestRam": "RAM最大順",
       "sortOrderTooltip": "お使いの Mac のスペックに基づきモデルを並び替えます",
       "fit": {
         "recommended": "推奨",
