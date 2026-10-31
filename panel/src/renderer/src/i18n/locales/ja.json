@@ -246,7 +246,7 @@
     "about": {
       "title": "MLX Studio について",
       "desc": "Apple Silicon 向けローカル AI 推論",
-      "creator": "Jinho Jang が作成",
+      "creator": "Jinho Jang & krazyeom が作成",
       "language": "言語",
       "settings": "情報と設定",
       "version": "バージョン {version}",

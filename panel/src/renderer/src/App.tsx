@@ -515,6 +515,7 @@ function ServerModeContent() {
               <div className="flex flex-wrap gap-4 text-xs">
                 <a href="https://mlx.studio" target="_blank" rel="noopener noreferrer" className="text-primary hover:underline">mlx.studio</a>
                 <a href="https://github.com/jjang-ai/vmlx" target="_blank" rel="noopener noreferrer" className="text-primary hover:underline">GitHub</a>
+                <a href="https://github.com/krazyeom/vmlx" target="_blank" rel="noopener noreferrer" className="text-primary hover:underline">krazyeom (Fork)</a>
                 <a href="https://jangq.ai" target="_blank" rel="noopener noreferrer" className="text-primary hover:underline">JANG</a>
                 <a href="https://ko-fi.com/jinhojang" target="_blank" rel="noopener noreferrer" className="text-primary hover:underline">Ko-fi</a>
               </div>

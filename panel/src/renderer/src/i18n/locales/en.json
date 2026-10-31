@@ -246,7 +246,7 @@
     "about": {
       "title": "About MLX Studio",
       "desc": "Local AI inference for Apple Silicon",
-      "creator": "Created by Jinho Jang",
+      "creator": "Created by Jinho Jang & krazyeom",
       "language": "Language",
       "settings": "About & Settings",
       "version": "Version {version}",

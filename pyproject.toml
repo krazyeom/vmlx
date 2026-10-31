@@ -4,13 +4,14 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "vmlx"
-version = "1.6.82"
+version = "1.6.83"
 description = "MLX inference server for Apple Silicon — Text, Image, Video & Audio generation"
 readme = "README.md"
 license = {text = "Apache-2.0"}
 requires-python = ">=3.11,<3.15"
 authors = [
-    {name = "Jinho Jang", email = "eric@jangq.ai"}
+    {name = "Jinho Jang", email = "eric@jangq.ai"},
+    {name = "krazyeom"}
 ]
 keywords = ["llm", "mlx", "apple-silicon", "vllm", "inference", "transformers"]
 classifiers = [

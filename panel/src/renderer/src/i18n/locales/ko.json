@@ -246,7 +246,7 @@
     "about": {
       "title": "MLX Studio 정보",
       "desc": "Apple Silicon용 로컬 AI 추론",
-      "creator": "Jinho Jang 제작",
+      "creator": "Jinho Jang · krazyeom 제작",
       "language": "언어",
       "settings": "정보 및 설정",
       "version": "버전 {version}",

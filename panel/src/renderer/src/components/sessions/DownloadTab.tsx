@@ -448,16 +448,6 @@ export function DownloadTab({ onDownloadComplete, initialModelType = 'text' }: D
             </span>
           </div>
           <div className="flex flex-wrap items-center gap-2 flex-shrink-0">
-            <select
-              value={macMemorySortOrder}
-              onChange={(e) => setMacMemorySortOrder(e.target.value as MacMemorySortOrder)}
-              className="px-2 py-1 bg-background border border-border rounded text-xs text-foreground cursor-pointer hover:border-primary/50 transition-colors"
-              title={t('sessions.download.sortOrderTooltip')}
-            >
-              <option value="compatibility">{t('sessions.download.sortOrderCompatibility')}</option>
-              <option value="comfortable">{t('sessions.download.sortOrderComfortable')}</option>
-              <option value="fullest_ram">{t('sessions.download.sortOrderFullestRam')}</option>
-            </select>
             <button
               type="button"
               onClick={() => setFilterCompatibleOnly(prev => !prev)}

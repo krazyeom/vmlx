@@ -4,6 +4,13 @@ All notable changes to vMLX Engine will be documented in this file.
 
 ---
 
+## [1.6.83] - 2026-10-31
+
+- Shorten memory fit sort option labels and remove sort prefix in Download tab to prevent line wrapping across 5 supported languages.
+- Support Mac hardware auto-detection with unified memory recommendations and README explicit requirement parsing (`Fits On`, markdown tables).
+- Add krazyeom fork attribution, contributors, and creator credits.
+- Fix Python 3.12 binary ad-hoc code-signing in afterPack script.
+
 ## [1.6.82] - 2026-10-27
 
 - Add DeepSeek-V4.1-Flash-1017 serving for compatible JANG affine and JANGHT bundles, with native Engram, image inputs, DSML tool calls and model-derived sampling defaults.

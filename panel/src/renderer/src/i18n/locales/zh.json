@@ -246,7 +246,7 @@
     "about": {
       "title": "关于 MLX Studio",
       "desc": "Apple Silicon 的本地 AI 推理",
-      "creator": "由 Jinho Jang 创建",
+      "creator": "由 Jinho Jang 和 krazyeom 创建",
       "language": "语言",
       "settings": "关于 & 设置",
       "version": "版本 {version}",
